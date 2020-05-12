@@ -7,14 +7,14 @@ public class Block {
     private String previousBlockHash;
     private  int  Nonce ;
     private  String MerkleTreeRoot ;
-    private ArrayList<transactions> transactions;
+    private ArrayList<transaction> transactions;
 
-    public ArrayList<transactions> getTransactions() {
+    public ArrayList<transaction> getTransactions() {
         return transactions;
 
     }
 
-    public void setTransactions(ArrayList<transactions> transactions) {
+    public void setTransactions(ArrayList<transaction> transactions) {
         this.transactions = transactions;
     }
 

@@ -1,0 +1,21 @@
+// PHASE 1
+
+                                                                                            priority
+1 - SHA256     PRIVATE KEY                mini task                    morcos                1
+2 - transaction                             task                        ahmed                 2
+3 - parsing                                nano task                    mahmoud               1
+4 - transactiontojson                      mini task                    ahmed                 3
+5 - Block                                    task                       morcos                2
+6 - POW                                      task                       eshraq                3
+7 - edit p2p connection ( threading)        mini task                   eshraq                1
+8 - BFT                                       task                       mahmoud              3
+
+
+
+//phase 2
+ Node
+ Miner
+
+
+ Dead line for prioty 1        is        13 / 5  11:59 pm
+ Dead line for prioty 2 or 3   is  14 / 5  11:59 pm

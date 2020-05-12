@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public class transactions {
+public class transaction {
     private  String hash;
     private  boolean flag;
     private int inputCounter;
@@ -8,6 +8,7 @@ public class transactions {
     private int outputCounter;
     private ArrayList<input> outputs;
     private String signature;
+
 
     public String getHash() {
         return hash;

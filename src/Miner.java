@@ -9,6 +9,8 @@ public class Miner extends Node {
     // validate transactions
     //
 
+    //
+
 
 }
 

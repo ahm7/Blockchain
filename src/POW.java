@@ -6,6 +6,7 @@ public class POW {
 
      this.block = b;
 
+
  }
 
 
