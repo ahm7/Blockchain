@@ -12,6 +12,7 @@ public class main {
      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, FileNotFoundException {
 
 
+         //testDatasetParser();
          testCreateTransaction();
                  /*
          Node node = new Node();
@@ -92,5 +93,11 @@ public class main {
 
     }
 
+
+    public static void testDatasetParser(){
+         parsing parse = new parsing();
+         ArrayList<TransactionFromText> transactions = parse.readDataset();
+         System.out.println("done");
+    }
 
 }
