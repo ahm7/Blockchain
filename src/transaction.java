@@ -1,68 +1,85 @@
+import java.security.*;
 import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 public class transaction {
-    private  String hash;
-    private  boolean flag;
-    private int inputCounter;
-    private ArrayList<input> inputs;
-    private int outputCounter;
-    private ArrayList<input> outputs;
-    private String signature;
+
+    private  JSONObject transactionObject = new JSONObject();
 
 
-    public String getHash() {
-        return hash;
+    public JSONObject getTransactionObject(){
+        return transactionObject;
     }
 
-    public void setHash(String hash) {
-        this.hash = hash;
+
+    public void setHash() {
+        SHA256 hasher = new SHA256();
+         String hash = hasher.generateHash(this.transactionObject.toString());
+        transactionObject.put("hash",hash);
     }
 
-    public String getSignature() {
-        return signature;
+
+
+    public void setSignature(PrivateKey privateKey) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+
+        SHA256 hasher = new SHA256();
+        String hash = hasher.generateHash(this.transactionObject.get("inputs").toString()+this.transactionObject.get("outputs").toString());
+
+        Signature sig = Signature.getInstance("SHA256withRSA");
+        sig.initSign(privateKey);
+        byte[] b = hash.getBytes();
+        sig.update(b);
+        byte[] signature = sig.sign();
+        this.transactionObject.put("signature",signature.toString());
+
     }
 
-    public void setSignature(String signature) {
-        this.signature = signature;
-    }
 
-    public boolean isFlag() {
-        return flag;
-    }
-
-    public void setFlag(boolean flag) {
-        this.flag = flag;
-    }
-
-    public int getInputCounter() {
-        return inputCounter;
-    }
 
     public void setInputCounter(int inputCounter) {
-        this.inputCounter = inputCounter;
-    }
-
-    public ArrayList<input> getInputs() {
-        return inputs;
+        this.transactionObject.put("inputCounter",inputCounter);
     }
 
     public void setInputs(ArrayList<input> inputs) {
-        this.inputs = inputs;
+        JSONArray inputs_array = new JSONArray();
+        for(int i=0;i<inputs.size();i++){
+
+            input input = inputs.get(i);
+            JSONObject inputObject = new JSONObject();
+            inputObject.put("prevTxHash", input.prevTxHash);
+            inputObject.put("outputIndex", input.outputIndex);
+            inputs_array.add(inputObject);
+        }
+
+        this.transactionObject.put("inputs",inputs_array);
     }
 
-    public int getOutputCounter() {
-        return outputCounter;
-    }
 
     public void setOutputCounter(int outputCounter) {
-        this.outputCounter = outputCounter;
+        this.transactionObject.put("outputCounter",outputCounter);
+
     }
 
-    public ArrayList<input> getOutputs() {
-        return outputs;
-    }
 
-    public void setOutputs(ArrayList<input> outputs) {
-        this.outputs = outputs;
+    private double value;
+    private int index;
+    private String publicKey;
+
+    public void setOutputs(ArrayList<output> outputs) {
+        JSONArray outputs_array = new JSONArray();
+        for(int i=0;i<outputs.size();i++){
+
+            output output = outputs.get(i);
+            JSONObject outputObject = new JSONObject();
+            outputObject.put("index", output.getIndex());
+            outputObject.put("value", output.getValue());
+            outputObject.put("publicKey", output.getPublicKey());
+            outputs_array.add(outputObject);
+        }
+
+        this.transactionObject.put("outputs",outputs_array);
+
     }
 }

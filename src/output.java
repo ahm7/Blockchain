@@ -1,7 +1,10 @@
+import java.security.PrivateKey;
+import java.security.PublicKey;
+
 public class output {
     private double value;
     private int index;
-    private String publcKey;
+    private PublicKey publicKey;
 
     public double getValue() {
         return value;
@@ -19,12 +22,12 @@ public class output {
         this.index = index;
     }
 
-    public String getPublcKey() {
-        return publcKey;
+    public PublicKey getPublicKey() {
+        return publicKey;
     }
 
-    public void setPublcKey(String publcKey) {
-        this.publcKey = publcKey;
+    public void setPublicKey(PublicKey publicKey) {
+        this.publicKey = publicKey;
     }
     // value
     //outputindex
