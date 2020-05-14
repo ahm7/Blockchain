@@ -16,7 +16,11 @@ public class main {
 
      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException {
          System.out.println(args[0]);
-         int port = Integer.parseInt(args[0]);
+         int nodeNumber = Integer.parseInt(args[0]);
+         parsing p = new parsing();
+         NodePeers node = p.readPort(nodeNumber);
+         int port = node.getPort();
+         System.out.println(port);
          PeerToPeer connect = new PeerToPeer();
          ServerSocket s = connect.openConnection(port);
          if(port == 4000){
