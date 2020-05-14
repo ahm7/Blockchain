@@ -50,22 +50,23 @@ public class Block implements Serializable{
     public void setMerkleTreeRoot(String merkleTreeRoot) {
         this.MerkleTreeRoot = merkleTreeRoot;
     }
-    /*
+    
     public void generateBlockHash() {
         if(!checkLength()) return;
         int transactionsLength = transactions.size();
-        int depth = Math.ceil(log2(transactionsLength));
+        int depth = (int)Math.ceil(log2(transactionsLength));
         ArrayList<String> currArray = transactionsToJson();
         ArrayList<String> nextArray = new ArrayList<String>();
+        SHA256 hasher = new SHA256();
         if(transactionsLength%2 == 1) {
             currArray.add(currArray.get(transactionsLength-1));
             transactionsLength++;
         }
         for(int i = 0; i < depth; i++) {
-            for(int i = 0; i < transactionsLength; i+=2) {
+            for(int j = 0; j < transactionsLength; j+=2) {
                 nextArray.add(
-                    SHA256.generateHash(
-                        SHA256.generateHash(currArray.get(i)) + SHA256.generateHash(currArray.get(i+1))
+                    hasher.generateHash(
+                        hasher.generateHash(currArray.get(j)) + hasher.generateHash(currArray.get(j+1))
                     )
                 );
             }
@@ -94,6 +95,4 @@ public class Block implements Serializable{
         }
         return result;
     }
-
-     */
 }
