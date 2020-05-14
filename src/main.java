@@ -2,7 +2,10 @@ import org.json.simple.JSONObject;
 
 import java.awt.image.AreaAveragingScaleFilter;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.security.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,13 +14,44 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class main {
 
-     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, FileNotFoundException {
+     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException {
+         System.out.println(args[0]);
+         int nodeNumber = Integer.parseInt(args[0]);
+         parsing p = new parsing();
+         NodePeers node = p.readPort(nodeNumber);
+         int port = node.getPort();
+         System.out.println(port);
+         PeerToPeer connect = new PeerToPeer();
+         ServerSocket s = connect.openConnection(port);
+         if(port == 4000){
+             testConnection();
+         }
+         Socket socket = s.accept();
+         System.out.println(socket);
+         Block b = connect.recieveblock(socket);
+         System.out.println(b.getMerkleTreeRoot());
+         //while(true){
+           //  connect.recieveblock(s);
+         //}
+         //testConnection();
+         //s.close();
 
-
-         ArrayList<JSONObject> transactions_objects = constructTransactions();
-
-
+         //ArrayList<JSONObject> transactions_objects = constructTransactions();
     }
+    public static void testConnection() throws IOException {
+        PeerToPeer conn = new PeerToPeer();
+        Block dummy = new Block();
+        dummy.setMerkleTreeRoot("Hello 4000");
+        parsing p = new parsing();
+        ArrayList<NodePeers> peers = p.readNodePeers(1);
+        for(int i = 0 ; i < peers.size() ; i++){
+            String ip = peers.get(i).getIP();
+            int port = peers.get(i).getPort();
+            conn.sendBlock(ip,port,dummy);
+        }
+    }
+
+
     public static void testCreateTransaction() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, FileNotFoundException {
         Node node = new Node();
         PublicKey publicKey = node.getPublicKey();

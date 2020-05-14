@@ -1,12 +1,13 @@
 import java.security.Timestamp;
 import java.util.ArrayList;
 import java.lang.Math;
+import java.io.Serializable;
 
-public class Block {
+public class Block implements Serializable{
 
     private Timestamp timestamp;
     private String previousBlockHash;
-    private int  Nonce;
+    private int  Nonce = 0;
     private String MerkleTreeRoot;
     private ArrayList<transaction> transactions;
 
@@ -49,8 +50,7 @@ public class Block {
     public void setMerkleTreeRoot(String merkleTreeRoot) {
         this.MerkleTreeRoot = merkleTreeRoot;
     }
-
-/*
+    /*
     public void generateBlockHash() {
         if(!checkLength()) return;
         int transactionsLength = transactions.size();
@@ -75,7 +75,8 @@ public class Block {
         }
         MerkleTreeRoot = currArray.get(0);
     }
-*/
+
+
 
     private Boolean checkLength() {
        return log2(transactions.size()) % 1 == 0 || log2(transactions.size() + 1) % 1 == 0;
@@ -89,8 +90,10 @@ public class Block {
     private ArrayList<String> transactionsToJson() {
         ArrayList<String> result = new ArrayList<String>();
         for(int i = 0; i < result.size(); i++) {
-           // result.add(transactions.get(i).toJson());
+            result.add(transactions.get(i).toJson());
         }
         return result;
     }
+
+     */
 }
