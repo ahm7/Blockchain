@@ -7,7 +7,7 @@ public class Block implements Serializable{
 
     private Timestamp timestamp;
     private String previousBlockHash;
-    private int  Nonce;
+    private int  Nonce = 0;
     private String MerkleTreeRoot;
     private ArrayList<transaction> transactions;
 
