@@ -2,7 +2,10 @@ import org.json.simple.JSONObject;
 
 import java.awt.image.AreaAveragingScaleFilter;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.security.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,13 +14,24 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class main {
 
-     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, FileNotFoundException {
+     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
+         PeerToPeer connect = new PeerToPeer();
+         ServerSocket s = connect.openConnection(6066);
+         testConnection();
+         s.close();
+
+         //ArrayList<JSONObject> transactions_objects = constructTransactions();
+    }
+    public static void testConnection() throws IOException {
 
 
-         ArrayList<JSONObject> transactions_objects = constructTransactions();
-
+         //read from file
+         //loop on clients and send dummy block
+         // close server connection
 
     }
+
+
     public static void testCreateTransaction() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, FileNotFoundException {
         Node node = new Node();
         PublicKey publicKey = node.getPublicKey();

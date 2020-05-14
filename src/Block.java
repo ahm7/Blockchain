@@ -49,7 +49,7 @@ public class Block {
     public void setMerkleTreeRoot(String merkleTreeRoot) {
         this.MerkleTreeRoot = merkleTreeRoot;
     }
-
+    /*
     public void generateBlockHash() {
         if(!checkLength()) return;
         int transactionsLength = transactions.size();
@@ -75,6 +75,8 @@ public class Block {
         MerkleTreeRoot = currArray.get(0);
     }
 
+
+
     private Boolean checkLength() {
        return log2(transactions.size()) % 1 == 0 || log2(transactions.size() + 1) % 1 == 0;
     }
@@ -91,4 +93,6 @@ public class Block {
         }
         return result;
     }
+
+     */
 }
