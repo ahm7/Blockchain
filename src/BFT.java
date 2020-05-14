@@ -9,50 +9,42 @@ public class BFT {
 
     }
 
-    public void prePrepare(Block b,int nodenumber) throws IOException {
-        // send block to all nodes in the network
+    public void prePrepare(Block b,int nodeNumber) throws IOException {
+        // Miner sends block to leader
         PeerToPeer conn = new PeerToPeer();
         parsing p = new parsing();
-        ArrayList<NodePeers> peers = p.readNodePeers(nodenumber);
+        NodePeers nodePort = p.readPort(nodeNumber);
+        String ip = nodePort.getIP();
+        int port = nodePort.getPort();
+        conn.sendBlock(ip, port, b);
+    }
+
+    public void prepare(Block b,int nodeNumber) throws IOException {
+        // Leader sends block to all nodes in the network
+        PeerToPeer conn = new PeerToPeer();
+        parsing p = new parsing();
+        ArrayList<NodePeers> peers = p.readNodePeers(nodeNumber);
         for(int i = 0 ; i < peers.size() ; i++) {
             String ip = peers.get(i).getIP();
             int port = peers.get(i).getPort();
             conn.sendBlock(ip, port, b);
         }
+        //rest of this stage is in node class
     }
 
-    public void prepare(Block b,int nodenumber) throws IOException {
-        // the node recieved block calls it
-
-        // validation of the block
-        boolean valid = false;
-        // forward the block to all the network
-        if(valid){
-            PeerToPeer conn = new PeerToPeer();
-            parsing p = new parsing();
-            ArrayList<NodePeers> peers = p.readNodePeers(nodenumber);
-            for(int i = 0 ; i < peers.size() ; i++) {
-                String ip = peers.get(i).getIP();
-                int port = peers.get(i).getPort();
-                conn.sendBlock(ip, port, b);
+    public boolean commit(Block b, boolean[] receivedVotes){
+        // Each node counts number of votes and decide whether to commit or not
+        boolean commit = false;
+        int trueCount = 0;
+        for(int i = 0;i < receivedVotes.length;i++){
+            if(receivedVotes[i]){
+                trueCount++;
+            }
+            if(trueCount > receivedVotes.length){
+                commit = true;
+                break;
             }
         }
-
-
+        return commit;
     }
-
-    public void commit(Block b, ArrayList<Block> recievedBlocks,int nodeNumber){
-        // compare all recieved blocks with one recieved in the prepare stage.
-        
-        // send commit or not according to the number of recieved blocks
-
-
-    }
-
-    public void recieveCommits(){
-        // recieve commit message
-        // count number of commits and don't commit
-    }
-
-
 }

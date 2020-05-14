@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PeerToPeer {
@@ -22,7 +23,7 @@ public class PeerToPeer {
         socket.close();
     }
 
-    public Block recieveblock(Socket socket) throws IOException, ClassNotFoundException {
+    public Block receiveBlock(Socket socket) throws IOException, ClassNotFoundException {
         InputStream inputStream = socket.getInputStream();
         ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
         Block b = (Block) objectInputStream.readObject();
@@ -31,4 +32,14 @@ public class PeerToPeer {
         return b;
     }
 
+    public void broadcastVote(boolean vote, int nodeNumber) throws IOException {
+        parsing p = new parsing();
+        ArrayList<NodePeers> peers = p.readNodePeers(nodeNumber);
+        for(int i = 0 ; i < peers.size() ; i++) {
+            String ip = peers.get(i).getIP();
+            int port = peers.get(i).getPort();
+            // send vote to node
+            // need to create class message to be able to send boolean or block
+        }
+    }
 }
