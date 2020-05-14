@@ -65,9 +65,7 @@ public class Block implements Serializable{
         for(int i = 0; i < depth; i++) {
             for(int j = 0; j < transactionsLength; j+=2) {
                 nextArray.add(
-                    hasher.generateHash(
-                        hasher.generateHash(currArray.get(j)) + hasher.generateHash(currArray.get(j+1))
-                    )
+                    hasher.generateHash(currArray.get(j) + currArray.get(j+1))
                 );
             }
             currArray = nextArray;
@@ -88,11 +86,10 @@ public class Block implements Serializable{
         return result;
     }
 
-    private ArrayList<String> transactionsToJson() {
+    private ArrayList<String> transactionsHashes() {
         ArrayList<String> result = new ArrayList<String>();
         for(int i = 0; i < result.size(); i++) {
-            result.add(transactions.get(i).getTransactionObject().toString());
-            String hash = transactions.get(i).getTransactionObject().get("hash").toString();
+            result.add(transactions.get(i).getTransactionObject().get("hash").toString());
         }
         return result;
     }
