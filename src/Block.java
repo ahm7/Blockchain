@@ -55,7 +55,7 @@ public class Block implements Serializable{
         if(!checkLength()) return;
         int transactionsLength = transactions.size();
         int depth = (int)Math.ceil(log2(transactionsLength));
-        ArrayList<String> currArray = transactionsToJson();
+        ArrayList<String> currArray = transactionsHashes();
         ArrayList<String> nextArray = new ArrayList<String>();
         SHA256 hasher = new SHA256();
         if(transactionsLength%2 == 1) {
