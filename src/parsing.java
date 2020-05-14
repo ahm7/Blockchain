@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 public class parsing {
 
+
     public ArrayList<TransactionFromText> readDataset(){
         try {
             ArrayList<TransactionFromText> transactions = new ArrayList<>();
@@ -64,7 +65,7 @@ public class parsing {
 
     public ArrayList<NodePeers> readNodePeers(int nodeNumber) throws FileNotFoundException {
         String path;
-        path = "Node" + nodeNumber + "Peers.txt";
+        path = "NodesPeers/Node" + nodeNumber + "Peers.txt";
         File myObj = new File(path);
         Scanner myReader = new Scanner(myObj);
         ArrayList<NodePeers> nodePeers = new ArrayList<>();

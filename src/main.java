@@ -14,21 +14,37 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class main {
 
-     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
+     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException {
+         System.out.println(args[0]);
+         int port = Integer.parseInt(args[0]);
          PeerToPeer connect = new PeerToPeer();
-         ServerSocket s = connect.openConnection(6066);
-         testConnection();
-         s.close();
+         ServerSocket s = connect.openConnection(port);
+         if(port == 4000){
+             testConnection();
+         }
+         Socket socket = s.accept();
+         System.out.println(socket);
+         Block b = connect.recieveblock(socket);
+         System.out.println(b.getMerkleTreeRoot());
+         //while(true){
+           //  connect.recieveblock(s);
+         //}
+         //testConnection();
+         //s.close();
 
          //ArrayList<JSONObject> transactions_objects = constructTransactions();
     }
     public static void testConnection() throws IOException {
-
-
-         //read from file
-         //loop on clients and send dummy block
-         // close server connection
-
+        PeerToPeer conn = new PeerToPeer();
+        Block dummy = new Block();
+        dummy.setMerkleTreeRoot("Hello 4000");
+        parsing p = new parsing();
+        ArrayList<NodePeers> peers = p.readNodePeers(1);
+        for(int i = 0 ; i < peers.size() ; i++){
+            String ip = peers.get(i).getIP();
+            int port = peers.get(i).getPort();
+            conn.sendBlock(ip,port,dummy);
+        }
     }
 
 

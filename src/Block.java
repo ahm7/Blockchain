@@ -1,8 +1,9 @@
 import java.security.Timestamp;
 import java.util.ArrayList;
 import java.lang.Math;
+import java.io.Serializable;
 
-public class Block {
+public class Block implements Serializable{
 
     private Timestamp timestamp;
     private String previousBlockHash;
