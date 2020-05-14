@@ -8,7 +8,7 @@ public class parsing {
     public ArrayList<TransactionFromText> readDataset(){
         try {
             ArrayList<TransactionFromText> transactions = new ArrayList<>();
-            File myObj = new File("testFiles/txdataset_v2.txt");
+            File myObj = new File("txdataset_v2.txt");
             Scanner myReader = new Scanner(myObj);
             int printIndex = 0;
             while (myReader.hasNextLine()) {
@@ -60,6 +60,25 @@ public class parsing {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public ArrayList<NodePeers> readNodePeers(int nodeNumber) throws FileNotFoundException {
+        String path;
+        path = "Node" + nodeNumber + "Peers.txt";
+        File myObj = new File(path);
+        Scanner myReader = new Scanner(myObj);
+        ArrayList<NodePeers> nodePeers = new ArrayList<>();
+        while (myReader.hasNextLine()) {
+            String data = myReader.nextLine();
+            String[] parsedPeer = parseString(data, "\\s+");
+            NodePeers nodePeer = new NodePeers();
+            nodePeer.setNodeTo(Integer.parseInt(parsedPeer[0]));
+            nodePeer.setIP(parsedPeer[1]);
+            nodePeer.setPort(Integer.parseInt(parsedPeer[2]));
+            nodePeers.add(nodePeer);
+        }
+        myReader.close();
+        return nodePeers;
     }
 
     public String[] parseString(String stringToParse, String regex){
