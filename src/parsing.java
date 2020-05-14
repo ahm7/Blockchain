@@ -82,6 +82,27 @@ public class parsing {
         return nodePeers;
     }
 
+    public NodePeers readPort(int nodeNumber) throws FileNotFoundException {
+        File myObj = new File("NodesPeers/NodesIPsAndPorts.txt");
+        Scanner myReader = new Scanner(myObj);
+        NodePeers nodePort = new NodePeers();
+        while (myReader.hasNextLine()) {
+            String data = myReader.nextLine();
+            String[] parsedNode = parseString(data, "\\s+");
+            if(Integer.parseInt(parsedNode[0]) == nodeNumber){
+                nodePort.setNodeTo(Integer.parseInt(parsedNode[0]));
+                nodePort.setIP(parsedNode[1]);
+                nodePort.setPort(Integer.parseInt(parsedNode[2]));
+                break;
+            }
+            else{
+                continue;
+            }
+        }
+        myReader.close();
+        return nodePort;
+    }
+
     public String[] parseString(String stringToParse, String regex){
         String[] parsedTransaction = stringToParse.split(regex);
         return parsedTransaction;
