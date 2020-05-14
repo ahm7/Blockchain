@@ -2,6 +2,7 @@ import org.json.simple.JSONObject;
 
 import java.awt.image.AreaAveragingScaleFilter;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
@@ -15,7 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class main {
 
      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException {
-         System.out.println(args[0]);
+         /*System.out.println(args[0]);
          int nodeNumber = Integer.parseInt(args[0]);
          parsing p = new parsing();
          NodePeers node = p.readPort(nodeNumber);
@@ -35,8 +36,9 @@ public class main {
          //}
          //testConnection();
          //s.close();
+*/
+         ArrayList<JSONObject> transactions_objects = constructTransactions();
 
-         //ArrayList<JSONObject> transactions_objects = constructTransactions();
     }
     public static void testConnection() throws IOException {
         PeerToPeer conn = new PeerToPeer();
@@ -100,7 +102,7 @@ public class main {
 
     }
 
-    public  static  ArrayList<JSONObject>  constructTransactions() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public  static  ArrayList<JSONObject>  constructTransactions() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, IOException {
         SHA256 hasher = new SHA256();
         parsing parse = new parsing();
         ArrayList<TransactionFromText> transaction_parse = parse.readDataset();
@@ -115,7 +117,7 @@ public class main {
         }
 
         ArrayList<JSONObject> transactions_objects = new ArrayList<JSONObject>();
-        for(int i=0;i<100;i++){
+        for(int i=0;i<53;i++){
 
             ArrayList<OutputsFromText>  outputs_parse = transaction_parse.get(i).getOutputs();
             InputsFromText input_parse    =  transaction_parse.get(i).getInputs();
@@ -150,8 +152,13 @@ public class main {
             transaction.setHash();
             transaction.setSignature(nodes[input_parse.getInput()].getPrivateKey());
 
+            //System.out.println(transaction.getTransactionObject().get("hash"));
+            map_txNum_to_hash.put(i,transaction.getTransactionObject().get("hash").toString());
             JSONObject test =  transaction.getTransactionObject();
             System.out.println(test);
+            FileWriter file = new FileWriter("testFiles/txs.json");
+            file.write(test.toJSONString());
+
             transactions_objects.add(test);
 
         }

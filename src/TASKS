@@ -16,6 +16,11 @@
  Node
  Miner
 
-
+1 - transaction validation ( UTXO - VALUE - SIGNATURE )
+2 - add block to the chain
+3 - validate the block  ( check all transaction is valid => add or if there is collison wait for the longest chain )
+4 - broadcasting function in miner
+5 - function to add transactions in block
+6 -
  Dead line for prioty 1        is        13 / 5  11:59 pm
  Dead line for prioty 2 or 3   is  14 / 5  11:59 pm

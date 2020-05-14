@@ -91,7 +91,8 @@ public class Block implements Serializable{
     private ArrayList<String> transactionsToJson() {
         ArrayList<String> result = new ArrayList<String>();
         for(int i = 0; i < result.size(); i++) {
-            result.add(transactions.get(i).toJson());
+            result.add(transactions.get(i).getTransactionObject().toString());
+            String hash = transactions.get(i).getTransactionObject().get("hash").toString();
         }
         return result;
     }
