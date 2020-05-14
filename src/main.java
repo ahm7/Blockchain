@@ -28,10 +28,10 @@ public class main {
          }
          Socket socket = s.accept();
          System.out.println(socket);
-         Block b = connect.recieveblock(socket);
+         Block b = connect.receiveBlock(socket);
          System.out.println(b.getMerkleTreeRoot());
          //while(true){
-           //  connect.recieveblock(s);
+           //  connect.receiveBlock(s);
          //}
          //testConnection();
          //s.close();
