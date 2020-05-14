@@ -154,6 +154,7 @@ public class main {
 
             //System.out.println(transaction.getTransactionObject().get("hash"));
             map_txNum_to_hash.put(i,transaction.getTransactionObject().get("hash").toString());
+
             JSONObject test =  transaction.getTransactionObject();
             System.out.println(test);
             FileWriter file = new FileWriter("testFiles/txs.json");

@@ -15,12 +15,17 @@
 //phase 2
  Node
  Miner
+block0
+miner broadcast block    =>  block1 valid  =>  block3  =
+miner2 broadcast block2  =>  block2 valid  =>  block4
 
-1 - transaction validation ( UTXO - VALUE - SIGNATURE )
-2 - add block to the chain
-3 - validate the block  ( check all transaction is valid => add or if there is collison wait for the longest chain )
-4 - broadcasting function in miner
-5 - function to add transactions in block
-6 -
- Dead line for prioty 1        is        13 / 5  11:59 pm
- Dead line for prioty 2 or 3   is  14 / 5  11:59 pm
+1 - transaction validation ( UTXO - VALUE - SIGNATURE )                                                                    Ahmed
+2 - add block to the chain                                                                                                 Ahmed
+3 - validate the block  ( check all transaction is valid => add or if there is collison wait for the longest chain )       Eshraq
+4 - broadcasting function in miner      ( check visited )                                                                  Eshraq
+5 - function to add transactions in block                                                                                  Morcos
+6 - choose Node transactions   ( use constructTransactions function in main to extract the node's transactions )           Mahmoud
+7 - issue transaction                                                                                                      Morcos
+8 -
+
+ Dead line    is      15 / 5  11:59 pm
