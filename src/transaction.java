@@ -82,4 +82,7 @@ public class transaction {
         this.transactionObject.put("outputs",outputs_array);
 
     }
+
+
+
 }
