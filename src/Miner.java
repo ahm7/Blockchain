@@ -7,7 +7,7 @@ public class Miner extends Node {
     // broadcast
     // BFT
     // validate transactions
-    //
+    // ArrayList of transaction
 
     //
 
