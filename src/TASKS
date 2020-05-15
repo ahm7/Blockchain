@@ -20,7 +20,7 @@ miner broadcast block    =>  block1 valid  =>  block3  =
 miner2 broadcast block2  =>  block2 valid  =>  block4
 
 1 - transaction validation ( UTXO - VALUE - SIGNATURE )                                                                    Ahmed
-2 - add block to the chain                                                                                                 Ahmed
+2 - add block to the chain                                                                                              Ahmed
 3 - validate the block  ( check all transaction is valid => add or if there is collison wait for the longest chain )       Eshraq
 4 - broadcasting function in miner      ( check visited )                                                                  Eshraq
 5 - function to add transactions in block                                                                                  Morcos

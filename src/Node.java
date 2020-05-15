@@ -20,11 +20,12 @@ public class Node {
 
     private PrivateKey privateKey;
     private PublicKey publicKey;
-    private Map<String,JSONObject> UTXO_list;
+    private Map<String,JSONObject> UTXO_list = new HashMap<String,JSONObject>();
+    private Map<String,JSONObject> temp_UTXO_list = new HashMap<String,JSONObject>();
     ArrayList<PublicKey> publicKeys;
 
     public void  Node(){
-        this.UTXO_list = new HashMap<String,JSONObject>();
+        //this.UTXO_list = new HashMap<String,JSONObject>();
         this.publicKeys = new ArrayList<>();
     }
     public PrivateKey getPrivateKey() {
@@ -54,35 +55,96 @@ public class Node {
     }
 
 
+    // used after add block to block chain
+    public void update_UTXO(JSONObject transaction){
+        JSONArray inputs  = (JSONArray) transaction.get("inputs");
+        for (Object o : inputs) {
+            JSONObject jsonLineItem = (JSONObject) o;
+            String prevTxHash = jsonLineItem.get("prevTxHash").toString();
+            int  outputIndex = (int)jsonLineItem.get("outputIndex");
+
+
+            if(UTXO_list.containsKey(prevTxHash)){
+                JSONObject used_outputs = (JSONObject) UTXO_list.get(prevTxHash).get("used_outputs");
+                int usedOutputcounter = (int)used_outputs.get("usedOutputcounter");
+                used_outputs.remove("usedOutputcounter");
+                used_outputs.put("usedOutputcounter",usedOutputcounter-1);
+
+                used_outputs.remove(""+outputIndex);
+                used_outputs.put(""+outputIndex,0);
+                if(usedOutputcounter-1 == 0){
+                    UTXO_list.remove(prevTxHash);
+                }
+
+
+
+            }
+
+
+        }
+
+
+
+    }
     public  void add_UTXO(JSONObject transaction){
 
         String hash = transaction.get("hash").toString();
         int outputCounter = (int)transaction.get("outputCounter");
-        ArrayList<Integer> unspend_Outputs = new ArrayList<Integer>();
-        unspend_Outputs.add(outputCounter); // decreases with each use to this transction when reach 0 remove from the list
+        JSONObject output_indexes = new JSONObject();
+        output_indexes.put("usedOutputcounter",outputCounter);
+
+
         for(int i=0;i<outputCounter;i++){
-            unspend_Outputs.add(1); // if 1 that mean this output index unspend else 0
+            output_indexes.put((""+(i+1)),1); // if 1 that mean this output index unspend else 0
         }
-        transaction.put("used_outputs",unspend_Outputs);
+        transaction.put("used_outputs",output_indexes);
+        System.out.println(hash);
+        System.out.println(transaction);
+        JSONObject t = new JSONObject();
         UTXO_list.put(hash,transaction);
     }
 
 
     public boolean validateTransaction(JSONObject transaction) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
 
-       boolean singnatur_is_right = validateSignature(transaction);
+
        boolean IS_UTXO = isUnSpend(transaction);
-       boolean value_is_valid = validValue(transaction);
+
+       boolean singnatur_is_right = false ;
+        if(IS_UTXO ){
+            singnatur_is_right = validateSignature(transaction);
+        }
+       //boolean value_is_valid = validValue(transaction);
 
      return  singnatur_is_right & IS_UTXO ;
     }
 
     private boolean validValue(JSONObject transaction) {
+
         return false;
+
     }
 
     private boolean isUnSpend(JSONObject transaction) {
-        return false;
+        JSONArray inputs  = (JSONArray) transaction.get("inputs");
+        int inputCounter  = (int)transaction.get("inputCounter");
+        for (Object o : inputs) {
+            JSONObject jsonLineItem = (JSONObject) o;
+            String prevTxHash = jsonLineItem.get("prevTxHash").toString();
+            int  outputIndex = (int)jsonLineItem.get("outputIndex");
+
+            if(UTXO_list.containsKey(prevTxHash)){
+                JSONObject used_outputs = (JSONObject) UTXO_list.get(prevTxHash).get("used_outputs");
+                if((int)used_outputs.get(""+outputIndex)==0){
+                    return false;
+                }
+            }
+
+
+        }
+
+
+        return true;
     }
 
     private boolean validateSignature(JSONObject transaction) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
@@ -95,7 +157,7 @@ public class Node {
             int  outputIndex = (int)jsonLineItem.get("outputIndex");
             JSONArray prevTxOutputs  = (JSONArray) UTXO_list.get(prevTxHash).get("outputs");
 
-            JSONObject output =(JSONObject) prevTxOutputs.get(outputIndex);
+            JSONObject output =(JSONObject) prevTxOutputs.get(outputIndex-1);
             PublicKey publicKey = (PublicKey) output.get("publicKey");
 
             Signature sig = Signature.getInstance("SHA256withRSA");
@@ -104,13 +166,15 @@ public class Node {
             String temp = hasher.generateHash(transaction.get("inputs").toString()+transaction.get("outputs").toString());
             sig.update(temp.getBytes());
 
-            boolean keyPairMatches = sig.verify(transaction.get("signature").toString().getBytes());
-            return  keyPairMatches ;
-
+            byte [] b = (byte[]) transaction.get("signature");
+            boolean keyPairMatches = sig.verify(b);
+            if(!keyPairMatches) {
+                return keyPairMatches;
+            }
 
         }
 
-return false ;
+return true ;
 
     }
 

@@ -1,10 +1,8 @@
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.awt.image.AreaAveragingScaleFilter;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.*;
@@ -12,10 +10,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class main {
 
-     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException {
+     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException {
          /*System.out.println(args[0]);
          int nodeNumber = Integer.parseInt(args[0]);
          parsing p = new parsing();
@@ -37,7 +37,26 @@ public class main {
          //testConnection();
          //s.close();
 */
+         JSONParser parser = new JSONParser();
+         Node node  = new Node();
+         //JSONArray a = (JSONArray) parser.parse(new FileReader("testFiles/txs.json"));
+
+         int i=0;
          ArrayList<JSONObject> transactions_objects = constructTransactions();
+
+             node.add_UTXO(transactions_objects.get(40));
+             node.update_UTXO(transactions_objects.get(49));
+        System.out.println(node.validateTransaction(transactions_objects.get(49)));
+
+        /* ArrayList<JSONObject> transactions_objects = constructTransactions();
+         JSONArray a = new JSONArray();
+         a.add(transactions_objects.get(40));
+         a.add(transactions_objects.get(49));
+         //a.add(transactions_objects.get(49));
+
+         FileWriter file = new FileWriter("testFiles/txs.json");
+         file.write(a.toJSONString());
+         file.close();*/
 
     }
     public static void testConnection() throws IOException {
@@ -103,7 +122,7 @@ public class main {
     }
 
     public  static  ArrayList<JSONObject>  constructTransactions() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, IOException {
-        SHA256 hasher = new SHA256();
+         SHA256 hasher = new SHA256();
         parsing parse = new parsing();
         ArrayList<TransactionFromText> transaction_parse = parse.readDataset();
 
@@ -153,12 +172,11 @@ public class main {
             transaction.setSignature(nodes[input_parse.getInput()].getPrivateKey());
 
             //System.out.println(transaction.getTransactionObject().get("hash"));
-            map_txNum_to_hash.put(i,transaction.getTransactionObject().get("hash").toString());
+            map_txNum_to_hash.put(i+1,transaction.getTransactionObject().get("hash").toString());
 
             JSONObject test =  transaction.getTransactionObject();
-            System.out.println(test);
-            FileWriter file = new FileWriter("testFiles/txs.json");
-            file.write(test.toJSONString());
+           // System.out.println(test);
+
 
             transactions_objects.add(test);
 
