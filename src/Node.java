@@ -23,10 +23,10 @@ public class Node {
     private PublicKey publicKey;
     private Map<String,JSONObject> UTXO_list;
     ArrayList<PublicKey> publicKeys;
-    private Block tempBlock;
-    private Block lastBlock;
-    private boolean collisionModeOn = false;
-    ArrayList<ArrayList<Block>> collisionChains = new ArrayList<ArrayList<Block>>();
+
+    int maxLength = 0;
+    int maxIndex = 0;
+    private ArrayList<ArrayList<Block>> pendingBlocks = new ArrayList<ArrayList<Block>>();
 
     public void  Node(){
         this.UTXO_list = new HashMap<String,JSONObject>();
@@ -44,100 +44,83 @@ public class Node {
         generateKeyPair();
     }
 
-    public void validateBlock(Block b) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        // check if dublicate
-        SHA256 hash = new SHA256();
-        String concat = "";
-        concat += b.getPreviousBlockHash();
-        concat += b.getMerkleTreeRoot();
-        concat += b.getTimestamp();
-        concat += b.getNonce();
-        String concat2 = "";
-        concat2 += tempBlock.getPreviousBlockHash();
-        concat2 += tempBlock.getMerkleTreeRoot();
-        concat2 += tempBlock.getTimestamp();
-        concat2 += tempBlock.getNonce();
 
+    public void validateBlock(Block b)  throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        ArrayList<transaction> blockTransaction = b.getTransactions();
+        boolean valid = true;
+        for(int i = 0 ; i < blockTransaction.size() ; i++){
+            valid = validateTransaction(blockTransaction.get(i).getTransactionObject());
+            if(!valid){
+                break;
+            }
+        }
+        if(valid){
+            if(pendingBlocks.size() == 0){
+                ArrayList<Block> temp = new ArrayList<Block>();
+                temp.add(b);
+                pendingBlocks.add(temp);
 
-        if(concat != concat2){
-            // validate the transactions
-            ArrayList<transaction> blockTransaction = b.getTransactions();
-            boolean valid = true;
-            for(int i = 0 ; i < blockTransaction.size() ; i++){
-                valid = validateTransaction(blockTransaction.get(i).getTransactionObject());
-                if(!valid){
-                    break;
+            }
+
+            for(int i = 0 ; i < pendingBlocks.size() ; i++){
+                int listSize = pendingBlocks.get(i).size();
+                for(int j = 0 ; j < listSize; j++){
+                    Block temp = pendingBlocks.get(i).get(j);
+                    String blockHashValue = "";
+                    blockHashValue += temp.getPreviousBlockHash();
+                    blockHashValue += temp.getMerkleTreeRoot();
+                    blockHashValue += temp.getTimestamp();
+                    blockHashValue += temp.getNonce();
+                    if(blockHashValue == b.getPreviousBlockHash() && j != listSize - 1){
+                        ArrayList<Block> collisionList = new ArrayList<Block>();
+                        for(int z = 0 ; z <= j ; z++){
+                            collisionList.add(pendingBlocks.get(i).get(z));
+                        }
+                        collisionList.add(b);
+                        if(collisionList.size() > maxLength) {
+                            maxLength = collisionList.size();
+                            maxIndex = pendingBlocks.size();
+                        }
+                        pendingBlocks.add(collisionList);
+                        break;
+                    }else if(blockHashValue == b.getPreviousBlockHash() && j == listSize - 1){
+                        pendingBlocks.get(i).add(b);
+                        if(pendingBlocks.get(i).size() > maxLength){
+                            maxLength = pendingBlocks.get(i).size();
+                            maxIndex = i;
+                        }
+                        break;
+                    }
+
                 }
             }
-            if(valid){
-                String concat3 = "";
-                concat3 += lastBlock.getPreviousBlockHash();
-                concat3 += lastBlock.getMerkleTreeRoot();
-                concat3 += lastBlock.getTimestamp();
-                concat3 += lastBlock.getNonce();
-            //    boolean checkEndOFCollision();
-                // if valid
-                // temporary
-                if(collisionModeOn){
-                    if(concat3 == b.getPreviousBlockHash()){
-                        ArrayList<Block> temp = new ArrayList<Block>();
-                        temp.add(b);
-                        collisionChains.add(temp);
 
+            if(maxLength > 6){
+                Block safeBlock = pendingBlocks.get(maxIndex).get(0);
+                String safeblockHashValue = "";
+                safeblockHashValue += safeBlock.getPreviousBlockHash();
+                safeblockHashValue += safeBlock.getMerkleTreeRoot();
+                safeblockHashValue += safeBlock.getTimestamp();
+                safeblockHashValue += safeBlock.getNonce();
+                // chain.add(safeBlock);
+                for(int i = 0 ; i < pendingBlocks.size() ; i++){
+                    Block temp = pendingBlocks.get(i).get(0);
+                    String blockHashValue = "";
+                    blockHashValue += temp.getPreviousBlockHash();
+                    blockHashValue += temp.getMerkleTreeRoot();
+                    blockHashValue += temp.getTimestamp();
+                    blockHashValue += temp.getNonce();
+                    if(safeblockHashValue == blockHashValue){
+                        pendingBlocks.get(i).remove(0);
                     }else{
-                        for(int j = 0 ; j < collisionChains.size() ; j++){
-                            int lastIndex = collisionChains.get(j).size();
-
-                            Block last = collisionChains.get(j).get(lastIndex - 1);
-                            String concat4 = "";
-                            concat4 += last.getPreviousBlockHash();
-                            concat4 += last.getMerkleTreeRoot();
-                            concat4 += last.getTimestamp();
-                            concat4 += last.getNonce();
-                            if(concat4 == b.getPreviousBlockHash()) {
-                                collisionChains.get(j).add(b);
-                            }
-                        }
-
+                        pendingBlocks.remove(i);
                     }
-                    boolean checkEndOFCollision = false;
-                    int index = 0;
-                    for(int j = 0 ; j < collisionChains.size() ; j++){
-                        int size = collisionChains.get(j).size();
-                        if(size == 7){
-                            index = j;
-                            checkEndOFCollision = true;
-                        }
-                    }
-                    if(checkEndOFCollision){
-                        ArrayList<Block> temp = collisionChains.get(index);
-                        for(int z =0 ; z < temp.size() - 1 ; z++){
-                            // chain.add(temp.get(z));
-                        }
-                        tempBlock = temp.get(temp.size() - 1);
-
-                      collisionChains.clear();
-                      collisionModeOn = false;
-
-                    }
-
-
-                } else if(concat2 == b.getPreviousBlockHash()){
-                    // add temp block to the chain
-                    tempBlock = b;
-                }else if(concat3 == b.getPreviousBlockHash()) {
-                    collisionModeOn = true;
-                    ArrayList<Block> temp = new ArrayList<Block>();
-                    temp.add(tempBlock);
-                    collisionChains.add(temp);
-                    ArrayList<Block> temp2 = new ArrayList<Block>();
-                    temp2.add(b);
-                    collisionChains.add(temp2);
                 }
-                // collision or add block to chain
+                maxLength = maxLength - 1;
             }
 
         }
+
     }
 
     public void generateKeyPair() {
