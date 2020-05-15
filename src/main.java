@@ -37,6 +37,7 @@ public class main {
          //testConnection();
          //s.close();
 */
+         /*
          JSONParser parser = new JSONParser();
          Node node  = new Node();
          //JSONArray a = (JSONArray) parser.parse(new FileReader("testFiles/txs.json"));
@@ -47,7 +48,7 @@ public class main {
              node.add_UTXO(transactions_objects.get(40));
              node.update_UTXO(transactions_objects.get(49));
         System.out.println(node.validateTransaction(transactions_objects.get(49)));
-
+        */
         /* ArrayList<JSONObject> transactions_objects = constructTransactions();
          JSONArray a = new JSONArray();
          a.add(transactions_objects.get(40));
@@ -57,7 +58,7 @@ public class main {
          FileWriter file = new FileWriter("testFiles/txs.json");
          file.write(a.toJSONString());
          file.close();*/
-
+        testSplitNodeTransactions();
     }
     public static void testConnection() throws IOException {
         PeerToPeer conn = new PeerToPeer();
@@ -72,6 +73,13 @@ public class main {
         }
     }
 
+    public static void testSplitNodeTransactions() throws IOException {
+         parsing p = new parsing();
+         for(int i = 0;i < 50;i++){
+             p.createFile(i);
+         }
+         p.writeNodeTransactions();
+    }
 
     public static void testCreateTransaction() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, FileNotFoundException {
         Node node = new Node();
