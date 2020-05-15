@@ -23,23 +23,55 @@ public class PeerToPeer {
         socket.close();
     }
 
-    public Block receiveBlock(Socket socket) throws IOException, ClassNotFoundException {
+    public Block receiveBlock(ServerSocket s) throws IOException, ClassNotFoundException {
+        Socket socket = s.accept();
         InputStream inputStream = socket.getInputStream();
         ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
         Block b = (Block) objectInputStream.readObject();
         System.out.println("Received block !");
-        // print out the text of every message
+        socket.close();
         return b;
+    }
+
+    public void sendVote(String peerIP, int portNum,Vote nodeVote) throws IOException {
+        Socket socket = new Socket(peerIP, portNum);
+        System.out.println("Connected with "+ peerIP+ "!");
+        OutputStream outputStream = socket.getOutputStream();
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+        System.out.println("Sending Vote to the Socket "+ peerIP + " on port " + portNum);
+        objectOutputStream.writeObject(nodeVote);
+        System.out.println("Connection with "+ peerIP+ " closed !");
+        socket.close();
+    }
+
+    public Vote receiveVote(ServerSocket s) throws IOException, ClassNotFoundException {
+        Socket socket = s.accept();
+        InputStream inputStream = socket.getInputStream();
+        ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+        Vote nodeVote = (Vote) objectInputStream.readObject();
+        System.out.println("Received vote !");
+        socket.close();
+        return nodeVote;
     }
 
     public void broadcastVote(boolean vote, int nodeNumber) throws IOException {
         parsing p = new parsing();
         ArrayList<NodePeers> peers = p.readNodePeers(nodeNumber);
+        Vote nodeVote = new Vote(vote);
         for(int i = 0 ; i < peers.size() ; i++) {
             String ip = peers.get(i).getIP();
             int port = peers.get(i).getPort();
-            // send vote to node
-            // need to create class message to be able to send boolean or block
+            sendVote(ip, port, nodeVote);
+        }
+    }
+
+    public void broadcastBlock(Block b, int nodeNumber) throws IOException {
+        parsing p = new parsing();
+        ArrayList<NodePeers> peers = p.readNodePeers(nodeNumber);
+        for(int i = 0 ; i < peers.size() ; i++) {
+            String ip = peers.get(i).getIP();
+            int port = peers.get(i).getPort();
+            sendBlock(ip, port, b);
         }
     }
 }

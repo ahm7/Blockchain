@@ -32,7 +32,7 @@ public class BFT {
         //rest of this stage is in node class
     }
 
-    public boolean commit(Block b, boolean[] receivedVotes){
+    public boolean commit(int nodeNumber, boolean[] receivedVotes){
         // Each node counts number of votes and decide whether to commit or not
         boolean commit = false;
         int trueCount = 0;
