@@ -1,5 +1,4 @@
-import java.io.File;  // Import the File class
-import java.io.FileNotFoundException;  // Import this class to handle errors
+import java.io.*;
 import java.util.Scanner; // Import the Scanner class to read text files
 import java.util.ArrayList;
 
@@ -9,13 +8,13 @@ public class parsing {
     public ArrayList<TransactionFromText> readDataset(){
         try {
             ArrayList<TransactionFromText> transactions = new ArrayList<>();
-            File myObj = new File("testFiles/txdataset_v2.txt");
+            File myObj = new File("TestFiles\\txdataset_v2.txt");
             Scanner myReader = new Scanner(myObj);
             int printIndex = 0;
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
                 String[] parsedTransaction = parseString(data,"\\s+");
-                if(printIndex == 0){
+                if(printIndex == 0 || data.equals("41226")){
                     printIndex++;
                     continue;
                 }
@@ -103,8 +102,40 @@ public class parsing {
         return nodePort;
     }
 
+    public void writeNodeTransactions() throws IOException {
+        File myObj = new File("TestFiles\\txdataset_v2.txt");
+        Scanner myReader = new Scanner(myObj);
+        int printIndex = 0;
+        while (myReader.hasNextLine()) {
+            String data = myReader.nextLine();
+            if(printIndex != 0 && !data.equals("41226")){
+                System.out.println(data);
+                String[] parsedTransaction = parseString(data,"\\s+");
+                String[] parsedInput = parseString(parsedTransaction[1], ":");
+                int nodeNumber = Integer.parseInt(parsedInput[1]);
+                String path = "";
+                path = "TestFiles\\Node" + nodeNumber + "Transactions.txt";
+                Writer output;
+                output = new BufferedWriter(new FileWriter(path, true));
+                String line = data + "\n";
+                output.append(line);
+                output.close();
+            }
+            printIndex++;
+        }
+        myReader.close();
+    }
+
     public String[] parseString(String stringToParse, String regex){
         String[] parsedTransaction = stringToParse.split(regex);
         return parsedTransaction;
     }
+
+    public void createFile(int nodeNumber) throws IOException {
+        String path;
+        path = "TestFiles\\Node" + nodeNumber + "Transactions.txt";
+        File myObj = new File(path);
+        myObj.createNewFile();
+    }
+
 }

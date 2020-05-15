@@ -32,7 +32,7 @@ public class transaction {
         byte[] b = hash.getBytes();
         sig.update(b);
         byte[] signature = sig.sign();
-        this.transactionObject.put("signature",signature.toString());
+        this.transactionObject.put("signature",signature);
 
     }
 
