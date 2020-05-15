@@ -1,7 +1,7 @@
-import java.security.Timestamp;
 import java.util.ArrayList;
 import java.lang.Math;
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 public class Block implements Serializable{
 
@@ -9,7 +9,7 @@ public class Block implements Serializable{
     private String previousBlockHash;
     private int  Nonce = 0;
     private String MerkleTreeRoot;
-    private ArrayList<transaction> transactions;
+    private ArrayList<transaction> transactions = new ArrayList<transaction>();
 
     public ArrayList<transaction> getTransactions() {
         return transactions;
@@ -93,4 +93,6 @@ public class Block implements Serializable{
         }
         return result;
     }
+
+
 }

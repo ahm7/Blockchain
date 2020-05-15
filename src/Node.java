@@ -1,6 +1,7 @@
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import javax.sound.midi.SysexMessage;
 import java.security.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,8 +63,8 @@ public class Node {
                 pendingBlocks.add(temp);
 
             }
-
-            for(int i = 0 ; i < pendingBlocks.size() ; i++){
+            int size = pendingBlocks.size();
+            for(int i = 0 ; i < size; i++){
                 int listSize = pendingBlocks.get(i).size();
                 for(int j = 0 ; j < listSize; j++){
                     Block temp = pendingBlocks.get(i).get(j);
@@ -72,7 +73,10 @@ public class Node {
                     blockHashValue += temp.getMerkleTreeRoot();
                     blockHashValue += temp.getTimestamp();
                     blockHashValue += temp.getNonce();
-                    if(blockHashValue == b.getPreviousBlockHash() && j != listSize - 1){
+                    //System.out.println(blockHashValue );
+                    //System.out.println(b.getPreviousBlockHash());
+                    //System.out.println(pendingBlocks.size());
+                    if(blockHashValue.equals(b.getPreviousBlockHash()) && j != listSize - 1){
                         ArrayList<Block> collisionList = new ArrayList<Block>();
                         for(int z = 0 ; z <= j ; z++){
                             collisionList.add(pendingBlocks.get(i).get(z));
@@ -84,7 +88,7 @@ public class Node {
                         }
                         pendingBlocks.add(collisionList);
                         break;
-                    }else if(blockHashValue == b.getPreviousBlockHash() && j == listSize - 1){
+                    }else if(blockHashValue.equals(b.getPreviousBlockHash()) && j == listSize - 1){
                         pendingBlocks.get(i).add(b);
                         if(pendingBlocks.get(i).size() > maxLength){
                             maxLength = pendingBlocks.get(i).size();
@@ -104,23 +108,33 @@ public class Node {
                 safeblockHashValue += safeBlock.getTimestamp();
                 safeblockHashValue += safeBlock.getNonce();
                 // chain.add(safeBlock);
-                for(int i = 0 ; i < pendingBlocks.size() ; i++){
+              
+                for(int i = 0 ; i <  pendingBlocks.size(); i++){
                     Block temp = pendingBlocks.get(i).get(0);
                     String blockHashValue = "";
                     blockHashValue += temp.getPreviousBlockHash();
                     blockHashValue += temp.getMerkleTreeRoot();
                     blockHashValue += temp.getTimestamp();
                     blockHashValue += temp.getNonce();
-                    if(safeblockHashValue == blockHashValue){
+                    if(safeblockHashValue.equals(blockHashValue)){
                         pendingBlocks.get(i).remove(0);
                     }else{
                         pendingBlocks.remove(i);
+                        i--;
                     }
                 }
                 maxLength = maxLength - 1;
             }
 
         }
+        for(int i = 0; i < pendingBlocks.size() ; i++){
+            for(int j = 0 ; j < pendingBlocks.get(i).size() ; j++){
+                System.out.print(pendingBlocks.get(i).get(j).getMerkleTreeRoot() + " ");
+            }
+            System.out.println("");
+        }
+        System.out.println(maxLength);
+        System.out.println(maxIndex);
 
     }
 
