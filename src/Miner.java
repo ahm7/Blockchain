@@ -49,7 +49,7 @@ public class Miner extends Node {
         }
     }
 
-    
+
 
 
     private Block buildBlock(ArrayList<JSONObject> transactions ){
