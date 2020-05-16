@@ -56,12 +56,12 @@ public class PeerToPeer {
         socket.close();
     }
 
-    public void sendTx(String peerIP, int portNum,JSONObject tx) throws IOException {
+    public void sendtx(String peerIP, int portNum,JSONObject tx) throws IOException {
         Socket socket = new Socket(peerIP, portNum);
         System.out.println("Connected with "+ peerIP+ "!");
         OutputStream outputStream = socket.getOutputStream();
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-        System.out.println("Sending Vote to the Socket "+ peerIP + " on port " + portNum);
+        System.out.println("Sending transaction to the Socket "+ peerIP + " on port " + portNum);
         objectOutputStream.writeObject(tx);
         System.out.println("Connection with "+ peerIP+ " closed !");
         socket.close();
@@ -90,11 +90,12 @@ public class PeerToPeer {
 
     public void broadcastTx(JSONObject tx , int nodeNumber) throws IOException {
         parsing p = new parsing();
-        ArrayList<NodePeers> peers = p.readMiners();
+        ArrayList<NodePeers> peers = p.readNodePeers(nodeNumber);
+
         for(int i = 0 ; i < peers.size() ; i++) {
             String ip = peers.get(i).getIP();
             int port = peers.get(i).getPort();
-            sendTx(ip, port, tx);
+            sendtx(ip, port, tx);
         }
     }
 

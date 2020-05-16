@@ -26,8 +26,5 @@ miner2 broadcast block2  =>  block2 valid  =>  block4
 5 - function to add transactions in block                                                                                  Morcos
 6 - choose Node transactions   ( use constructTransactions function in main to extract the node's transactions )           Mahmoud
 7 - issue transaction
-                                                                                                                           Morcos
-
-
-
+                                                                                                                             Morcos
  Dead line    is      15 / 5  11:59 pm
