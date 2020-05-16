@@ -9,6 +9,7 @@ import java.security.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.sql.Timestamp;
 import java.util.concurrent.ThreadLocalRandom;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -17,12 +18,15 @@ import java.sql.Timestamp;
 public class main {
 
      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException {
+         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
          /*System.out.println(args[0]);
          int nodeNumber = Integer.parseInt(args[0]);
          parsing p = new parsing();
          NodePeers node = p.readPort(nodeNumber);
          int port = node.getPort();
          System.out.println(port);
+
          PeerToPeer connect = new PeerToPeer();
          ServerSocket s = connect.openConnection(port);
          if(port == 4000){
@@ -50,18 +54,19 @@ public class main {
              node.update_UTXO(transactions_objects.get(49));
         System.out.println(node.validateTransaction(transactions_objects.get(49)));
         */
-        /* ArrayList<JSONObject> transactions_objects = constructTransactions();
+     /*    ArrayList<JSONObject> transactions_objects = constructTransactions();
          JSONArray a = new JSONArray();
-         a.add(transactions_objects.get(40));
-         a.add(transactions_objects.get(49));
-         //a.add(transactions_objects.get(49));
-
+       for(int k=0;k<transactions_objects.size();k++){
+             a.add(transactions_objects.get(k));
+         }
+         System.out.println(transactions_objects);
          FileWriter file = new FileWriter("testFiles/txs.json");
          file.write(a.toJSONString());
-         file.close();*/
+         file.close();
         //testSplitNodeTransactions();
-
-         Node n = new Node();
+*/
+         testTransactionsWithBlock();
+/*         Node n = new Node();
          Timestamp time = new Timestamp(System.currentTimeMillis());
 
          Block b0 = new Block();
@@ -221,6 +226,7 @@ public class main {
          n.validateBlock(b9);
          n.validateBlock(b10);
          n.validateBlock(b11);
+         */
     }
     public static void testConnection() throws IOException {
         PeerToPeer conn = new PeerToPeer();
@@ -295,6 +301,8 @@ public class main {
          SHA256 hasher = new SHA256();
         parsing parse = new parsing();
         ArrayList<TransactionFromText> transaction_parse = parse.readDataset();
+        System.out.println("traparse"+" "+ transaction_parse.size());
+
 
         Map<Integer,String> map_txNum_to_hash = new HashMap<Integer,String>();
         String hash_temp = hasher.generateHash("temp");
@@ -306,7 +314,7 @@ public class main {
         }
 
         ArrayList<JSONObject> transactions_objects = new ArrayList<JSONObject>();
-        for(int i=0;i<53;i++){
+        for(int i=0;i<transaction_parse.size();i++){
 
             ArrayList<OutputsFromText>  outputs_parse = transaction_parse.get(i).getOutputs();
             InputsFromText input_parse    =  transaction_parse.get(i).getInputs();
@@ -360,38 +368,225 @@ public class main {
          System.out.println("done");
     }
 
+    public static  void testTransactionsWithBlock() throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
 
-    /*  public private key draft  */
-    //  testDatasetParser();
-    //  testCreateTransaction();
-                 /*
-         Node node = new Node();
-         PublicKey publicKey = node.getPublicKey();
-         PrivateKey privateKey = node.getPrivateKey();
-
-
-         byte[] challenge = new byte[10000];
-         ThreadLocalRandom.current().nextBytes(challenge);
-
-         SHA256 test = new SHA256();
-         String temp = test.generateHash(challenge.toString());
-         Signature sig = Signature.getInstance("SHA256withRSA");
-         sig.initSign(privateKey);
-         byte[] b = temp.getBytes();
-         sig.update(b);
-         byte[] signature = sig.sign();
-         System.out.println(signature);
-// verify signature using the public key
-
-         sig.initVerify(publicKey);
-         sig.update(challenge);
-
-         boolean keyPairMatches = sig.verify(signature);
-
-         System.out.println(keyPairMatches);
-
-    */
+        ArrayList<JSONObject> transactions_objects = constructTransactions();
+        System.out.println("trasize"+" "+ transactions_objects.size());
+        JSONArray a = new JSONArray();
+        for(int k=0;k<transactions_objects.size();k++){
+            a.add(transactions_objects.get(k));
+        }
+        System.out.println(transactions_objects.size());
 
 
+        Node n = new Node();
+        Timestamp time = new Timestamp(System.currentTimeMillis());
 
+        Block b0 = new Block();
+
+        b0.setNonce(0);
+        ArrayList<JSONObject> t0 = new ArrayList<>();
+        t0.add(transactions_objects.get(0));
+        t0.add(transactions_objects.get(1));
+        b0.setTransactions(t0);
+        b0.generateBlockHash();
+        //b0.setMerkleTreeRoot("0");
+        b0.setTimestamp(time);
+        b0.setPreviousBlockHash("0");
+
+        String blockHashValue1 = "";
+        blockHashValue1 += b0.getPreviousBlockHash();
+        blockHashValue1 += b0.getMerkleTreeRoot();
+        blockHashValue1 += b0.getTimestamp();
+        blockHashValue1 += b0.getNonce();
+
+        Block b1 = new Block();
+
+        b1.setPreviousBlockHash(blockHashValue1);
+        b1.setNonce(1);
+        ArrayList<JSONObject> t1 = new ArrayList<>();
+        t1.add(transactions_objects.get(2));
+        t1.add(transactions_objects.get(3));
+        b1.setTransactions(t1);
+        b1.generateBlockHash();
+        //b1.setMerkleTreeRoot("1");
+        b1.setTimestamp(time);
+
+//
+        String blockHashValue2 = "";
+        blockHashValue2 += b1.getPreviousBlockHash();
+        blockHashValue2 += b1.getMerkleTreeRoot();
+        blockHashValue2 += b1.getTimestamp();
+        blockHashValue2 += b1.getNonce();
+
+        Block b2 = new Block();
+
+
+
+        b2.setPreviousBlockHash(blockHashValue2);
+        b2.setNonce(2);
+        //b2.setMerkleTreeRoot("2");
+        ArrayList<JSONObject> t2 = new ArrayList<>();
+        t2.add(transactions_objects.get(4));
+        t2.add(transactions_objects.get(5));
+        b2.setTransactions(t2);
+        b2.generateBlockHash();
+        b2.setTimestamp(time);
+
+
+        String blockHashValue3 = "";
+        blockHashValue3 += b2.getPreviousBlockHash();
+        blockHashValue3 += b2.getMerkleTreeRoot();
+        blockHashValue3 += b2.getTimestamp();
+        blockHashValue3 += b2.getNonce();
+
+        Block b3 = new Block();
+
+        b3.setPreviousBlockHash(blockHashValue3);
+        b3.setNonce(3);
+        //b3.setMerkleTreeRoot("3");
+        b3.setTimestamp(time);
+
+        ArrayList<JSONObject> t3 = new ArrayList<>();
+        t3.add(transactions_objects.get(6));
+        t3.add(transactions_objects.get(7));
+        b3.setTransactions(t3);
+        b3.generateBlockHash();
+
+        String blockHashValue4 = "";
+        blockHashValue4 += b3.getPreviousBlockHash();
+        blockHashValue4 += b3.getMerkleTreeRoot();
+        blockHashValue4 += b3.getTimestamp();
+        blockHashValue4 += b3.getNonce();
+
+
+        Block b4 = new Block();
+
+        b4.setPreviousBlockHash(blockHashValue4);
+        b4.setNonce(4);
+        //b4.setMerkleTreeRoot("4");
+        b4.setTimestamp(time);
+        ArrayList<JSONObject> t4 = new ArrayList<>();
+        t4.add(transactions_objects.get(8));
+        t4.add(transactions_objects.get(9));
+        b4.setTransactions(t4);
+        b4.generateBlockHash();
+
+        String blockHashValue5 = "";
+        blockHashValue5 += b4.getPreviousBlockHash();
+        blockHashValue5 += b4.getMerkleTreeRoot();
+        blockHashValue5 += b4.getTimestamp();
+        blockHashValue5 += b4.getNonce();
+
+        Block b5 = new Block();
+
+        b5.setPreviousBlockHash(blockHashValue5);
+        b5.setNonce(5);
+        //b5.setMerkleTreeRoot("5");
+        b5.setTimestamp(time);
+        ArrayList<JSONObject> t5 = new ArrayList<>();
+        t5.add(transactions_objects.get(10));
+        t5.add(transactions_objects.get(11));
+        b5.setTransactions(t5);
+        b5.generateBlockHash();
+
+
+        String blockHashValue6 = "";
+        blockHashValue6 += b5.getPreviousBlockHash();
+        blockHashValue6 += b5.getMerkleTreeRoot();
+        blockHashValue6 += b5.getTimestamp();
+        blockHashValue6 += b5.getNonce();
+
+        Block b7 = new Block();
+
+        b7.setPreviousBlockHash(blockHashValue6);
+        b7.setNonce(7);
+       // b7.setMerkleTreeRoot("7");
+        b7.setTimestamp(time);
+        ArrayList<JSONObject> t7 = new ArrayList<>();
+        t7.add(transactions_objects.get(12));
+        t7.add(transactions_objects.get(13));
+        b7.setTransactions(t7);
+        b7.generateBlockHash();
+
+        String blockHashValue8 = "";
+        blockHashValue8 += b7.getPreviousBlockHash();
+        blockHashValue8 += b7.getMerkleTreeRoot();
+        blockHashValue8 += b7.getTimestamp();
+        blockHashValue8 += b7.getNonce();
+
+        Block b8 = new Block();
+
+        b8.setPreviousBlockHash(blockHashValue8);
+        b8.setNonce(8);
+        //b8.setMerkleTreeRoot("8");
+        b8.setTimestamp(time);
+        ArrayList<JSONObject> t8 = new ArrayList<>();
+        t8.add(transactions_objects.get(14));
+        t8.add(transactions_objects.get(15));
+        b8.setTransactions(t8);
+        b8.generateBlockHash();
+
+        String blockHashValue9 = "";
+        blockHashValue9 += b8.getPreviousBlockHash();
+        blockHashValue9 += b8.getMerkleTreeRoot();
+        blockHashValue9 += b8.getTimestamp();
+        blockHashValue9 += b8.getNonce();
+
+        Block b9 = new Block();
+
+        b9.setPreviousBlockHash(blockHashValue9);
+        b9.setNonce(9);
+        //b9.setMerkleTreeRoot("9");
+        b9.setTimestamp(time);
+        ArrayList<JSONObject> t9 = new ArrayList<>();
+        t9.add(transactions_objects.get(16));
+        t9.add(transactions_objects.get(17));
+        b9.setTransactions(t9);
+        b9.generateBlockHash();
+
+        String blockHashValue10 = "";
+        blockHashValue10 += b9.getPreviousBlockHash();
+        blockHashValue10 += b9.getMerkleTreeRoot();
+        blockHashValue10 += b9.getTimestamp();
+        blockHashValue10 += b9.getNonce();
+
+    /*    Block b10 = new Block();
+
+        b10.setPreviousBlockHash(blockHashValue10);
+        b10.setNonce(10);
+        //b10.setMerkleTreeRoot("10");
+        b10.setTimestamp(time);
+        ArrayList<JSONObject> t10 = new ArrayList<>();
+        t10.add(transactions_objects.get(16));
+        t10.add(transactions_objects.get(17));
+        b10.setTransactions(t10);
+        b10.generateBlockHash();
+*/
+
+        //n.validateBlock(b0);
+        //n.validateBlock(b1);
+        //n.validateBlock(b2);
+        n.addToBlockchain(true,b0);
+        n.addToBlockchain(true,b1);
+        n.addToBlockchain(true,b2);
+        System.out.println("b7");
+        n.validateBlock(b3);
+        System.out.println("b3");
+        n.validateBlock(b4);
+        System.out.println("b4");
+        n.validateBlock(b5);
+        System.out.println("b8");
+        n.validateBlock(b7);
+        System.out.println("b5");
+        n.validateBlock(b8);
+        System.out.println("b9");
+        n.validateBlock(b9);
+        System.out.println("b10");
+        //n.validateBlock(b10);
+        //System.out.println("b");
+
+
+
+    }
 }
