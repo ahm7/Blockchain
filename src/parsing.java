@@ -103,6 +103,23 @@ public class parsing {
         return nodePort;
     }
 
+    public ArrayList<NodePeers> readMiners() throws FileNotFoundException {
+        File myObj = new File("NodesPeers/MinersIPs.txt");
+        Scanner myReader = new Scanner(myObj);
+        ArrayList<NodePeers> minerPeers = new ArrayList<>();
+        NodePeers minerPeer = new NodePeers();
+        while (myReader.hasNextLine()) {
+            String data = myReader.nextLine();
+            String[] parsedPeer = parseString(data, "\\s+");
+            minerPeer.setNodeTo(Integer.parseInt(parsedPeer[0]));
+            minerPeer.setIP(parsedPeer[1]);
+            minerPeer.setPort(Integer.parseInt(parsedPeer[2]));
+            minerPeers.add(minerPeer);
+        }
+        myReader.close();
+        return minerPeers;
+    }
+
     public void writeNodeTransactions() throws IOException {
         File myObj = new File("testFiles/txdataset_v2.txt");
         Scanner myReader = new Scanner(myObj);
