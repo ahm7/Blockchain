@@ -13,14 +13,14 @@ import java.util.Map;
 
 public class Miner extends Node {
 
-    private  String prevBlockHash ;
-    private  int  difficulty  = 2;
+    public  String prevBlockHash ;
+    public  int  difficulty  = 2;
     //private ArrayList<JSONObject> pending_transactions = new ArrayList<JSONObject>();
-    private Map<String,JSONObject> pending_transactions  = new HashMap<String,JSONObject>();
-    private Map<String,JSONObject> all_valid_transactions  = new HashMap<String,JSONObject>();
-    private Map<String,Integer> all_invalid_prevtransactions  = new HashMap<String,Integer>();
+    public Map<String,JSONObject> pending_transactions  = new HashMap<String,JSONObject>();
+    public Map<String,JSONObject> all_valid_transactions  = new HashMap<String,JSONObject>();
+    public Map<String,Integer> all_invalid_prevtransactions  = new HashMap<String,Integer>();
     //private Map<String,JSONObject> pending_transactions  = new HashMap<String,JSONObject>();
-    private  int blockSize = 2;
+    public  int blockSize = 2;
     public Miner(int portNum) {
         super(portNum);
     }
@@ -38,6 +38,7 @@ public class Miner extends Node {
 
 
     }
+
     public void recBlocks() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         while(true){
             Object b = s.getBlock();
@@ -45,63 +46,24 @@ public class Miner extends Node {
                 Class className = b.getClass();
                 String name = className.getName();
                 if(name.equals("Block")){
-                    validateBlock((Block) b);
+                    MinerSender h = new MinerSender(1,b,this);
+                    Thread thread = new Thread(h);
+                    thread.start();
+
                 }else if(name.equals("Vote")){
 
+
                 }else{
-                    JSONObject tx = (JSONObject) b;
-                    boolean valid_trans = this.validateTransaction(tx);
-                    if(valid_trans){
-                        boolean double_spend = false;
-                        JSONArray inputs_array = new JSONArray();
-                        String hash = tx.get("hash").toString();
-                        inputs_array = (JSONArray) tx.get("inputs");
-                        JSONObject inputObject = (JSONObject) inputs_array.get(0);
-                        String prev_tx_hash = (String) inputObject.get("prevTxHash");
-                        int  outputIndex = (int) inputObject.get("outputIndex");
-                        String string_outputIndex =""+outputIndex;
-
-                        // check if prev transaction used but not in main blockchain
-                        if(all_invalid_prevtransactions.containsKey(prev_tx_hash+string_outputIndex)){
-
-                            if(all_invalid_prevtransactions.get(prev_tx_hash+string_outputIndex) == outputIndex){
-                                double_spend = true;
-
-                            }
-
-
-
-                        }
-                        // check if it's a duplicate transaction
-                        if(all_valid_transactions.containsKey(hash)){
-                            double_spend = true;
-                        }
-
-                        if(!double_spend){
-                            pending_transactions.put(hash,tx);
-                            all_valid_transactions.put(hash,tx);
-                            all_invalid_prevtransactions.put(prev_tx_hash+string_outputIndex,outputIndex);
-                        }
-                        //pending_transactions.add(tx);
-                        if(pending_transactions.size() == blockSize){
-                            ArrayList<JSONObject> temp = new ArrayList<JSONObject>();
-
-                            for (String key: pending_transactions.keySet()) {
-
-                                temp.add(pending_transactions.get(key));
-                            }
-                            buildBlock(temp);
-                            pending_transactions.clear();
-                        }
-                    }
-
+                    MinerSender h = new MinerSender(3,b,this);
+                    Thread thread = new Thread(h);
+                    thread.start();
 
                 }
             }
         }
     }
 
-    private Block buildBlock(ArrayList<JSONObject> transactions ){
+    public Block buildBlock(ArrayList<JSONObject> transactions ){
         Block b = new Block();
         Timestamp time = new Timestamp(System.currentTimeMillis());
         b.setPreviousBlockHash(this.prevBlockHash);

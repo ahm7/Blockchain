@@ -1,6 +1,10 @@
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -26,28 +30,20 @@ public class MinerSender extends Thread{
             }else if(methodType == 3){
                 JSONObject tx = (JSONObject) b;
                 boolean valid_trans = m.validateTransaction(tx);
-                System.out.println(valid_trans);
-                valid_trans = true;
                 if(valid_trans){
                     boolean double_spend = false;
                     JSONArray inputs_array = new JSONArray();
+                    String hash = tx.get("hash").toString();
                     inputs_array = (JSONArray) tx.get("inputs");
                     JSONObject inputObject = (JSONObject) inputs_array.get(0);
                     String prev_tx_hash = (String) inputObject.get("prevTxHash");
-                    System.out.println(prev_tx_hash);
                     int  outputIndex = (int) inputObject.get("outputIndex");
-                    System.out.println(outputIndex);
-                    Map<String,JSONObject> pending_transactions = m.getPendingTrans();
+                    String string_outputIndex =""+outputIndex;
 
-                    if(pending_transactions.containsKey(prev_tx_hash)){
-                        JSONArray inputs_array2 = new JSONArray();
-                        inputs_array2 = (JSONArray) pending_transactions.get(prev_tx_hash).get("inputs");
-                        JSONObject inputObject2 = (JSONObject) inputs_array2.get(0);
-                        String prev_tx_hash2 = (String) inputObject.get("prevTxHash");
-                        int  outputIndex2 = (int) inputObject.get("outputIndex");
+                    // check if prev transaction used but not in main blockchain
+                    if(m.all_invalid_prevtransactions.containsKey(prev_tx_hash+string_outputIndex)){
 
-                        if(prev_tx_hash.equals(prev_tx_hash2) && outputIndex == outputIndex2){
-                            System.out.println("if cond");
+                        if(m.all_invalid_prevtransactions.get(prev_tx_hash+string_outputIndex) == outputIndex){
                             double_spend = true;
 
                         }
@@ -55,32 +51,46 @@ public class MinerSender extends Thread{
 
 
                     }
+                    // check if it's a duplicate transaction
+                    if(m.all_valid_transactions.containsKey(hash)){
+                        double_spend = true;
+                    }
 
                     if(!double_spend){
-                        pending_transactions.put(prev_tx_hash,tx);
+                        m.pending_transactions.put(hash,tx);
+                        m.all_valid_transactions.put(hash,tx);
+                        m.all_invalid_prevtransactions.put(prev_tx_hash+string_outputIndex,outputIndex);
                     }
                     //pending_transactions.add(tx);
-                    if(pending_transactions.size() == 2){
+                    if(m.pending_transactions.size() == m.blockSize){
                         ArrayList<JSONObject> temp = new ArrayList<JSONObject>();
 
-                        for (String key: pending_transactions.keySet()) {
+                        for (String key: m.pending_transactions.keySet()) {
 
-                            temp.add(pending_transactions.get(key));
+                            temp.add(m.pending_transactions.get(key));
                         }
                         Block bb = m.buildBlock(temp);
                         PeerToPeer conn = new PeerToPeer();
                         conn.broadcastBlock(bb,2);
                         System.out.println(bb.getNonce());
-                        pending_transactions.clear();
+                        m.pending_transactions.clear();
                     }
                 }
 
-            }
 
-        }catch (Exception e){
-
+                    }
+                } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (SignatureException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
         }
 
     }
 
-}
+        }
+
+
