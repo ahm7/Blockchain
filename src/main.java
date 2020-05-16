@@ -19,13 +19,40 @@ public class main {
 
      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException {
          Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+         JSONParser parser = new JSONParser();
+         JSONArray a = (JSONArray) parser.parse(new FileReader("testFiles/txs.json"));
+         JSONObject test = (JSONObject) a.get(0);
 
-         int nodeNumber = Integer.parseInt(args[0]);
+         long r = (long) test.get("inputCounter");
+
+
+         JSONObject trans = new JSONObject();
+         trans.put("hash","076cab0107c9f06661f3d42fb83719aff7b7d98c04d10176d2268e2dff92a6d9");
+         trans.put("inputCounter",1);
+         trans.put("signature","[B@43814d18");
+         trans.put("outputCounter",1);
+         trans.put("outputCounter",1);
+         JSONArray inputs = new JSONArray();
+         JSONObject input = new JSONObject();
+         input.put("prevTxHash","a6864eb339b0e1f6e00d75293a8840abf069a2c0fe82e6e53af6ac099793c1d5");
+         input.put("outputIndex",-1);
+         inputs.add(input);
+         trans.put("inputs",inputs);
+
+         JSONArray outputs = new JSONArray();
+         JSONObject output = new JSONObject();
+         output.put("publicKey","ahmed");
+         output.put("index",1);
+         outputs.add(output);
+         trans.put("outputs",outputs);
+
+
+        /* int nodeNumber = Integer.parseInt(args[0]);
          parsing p = new parsing();
          NodePeers node = p.readPort(nodeNumber);
          int port = node.getPort();
          Node n = new Node(port);
-         /*
+         *//*
          if(port == 4000){
              Block b = new Block();
              b.setMerkleTreeRoot("dummy");
@@ -34,14 +61,14 @@ public class main {
          }
 
 
-          */
+          *//*
          if(port == 4000){
              JSONObject j = new JSONObject();
              j.put("i","j");
              PeerToPeer conn = new PeerToPeer();
              conn.broadcastTx(j,nodeNumber);
          }
-         n.recBlocks();
+         n.recBlocks();*/
          /*
          Block b = new Block();
          Class className = b.getClass();

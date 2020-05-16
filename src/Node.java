@@ -22,12 +22,13 @@ public class Node {
     private Map<String,JSONObject> UTXO_list = new HashMap<String,JSONObject>();
     private Map<String,JSONObject> temp_UTXO_list = new HashMap<String,JSONObject>();
     ArrayList<PublicKey> publicKeys;
-    private ArrayList<Block> blockChain = new ArrayList<Block>();
+    public ArrayList<Block> blockChain = new ArrayList<Block>();
 
     int maxLength = 0;
     int maxIndex = 0;
     private ArrayList<ArrayList<Block>> pendingBlocks = new ArrayList<ArrayList<Block>>();
     Server s = null;
+
 
     public Node(int portNum){
         generateKeyPair();

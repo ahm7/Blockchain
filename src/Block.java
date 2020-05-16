@@ -1,4 +1,5 @@
 import netscape.javascript.JSObject;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
@@ -100,6 +101,20 @@ public class Block implements Serializable{
             result.add(transactions.get(i).get("hash").toString());
         }
         return result;
+    }
+
+    public boolean spendThisTx(JSONObject transaction){
+
+        transaction t = new transaction();
+        for(int i=0;i<transactions.size();i++){
+            boolean test = t.check_if_has_same_input(transaction,transactions.get(i));
+            if(test){
+
+                return true;
+            }
+        }
+
+           return false;
     }
 
 

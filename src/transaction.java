@@ -81,8 +81,50 @@ public class transaction {
 
         this.transactionObject.put("outputs",outputs_array);
 
+
     }
 
+    public boolean check_if_has_same_input(JSONObject transaction1 , JSONObject transaction2) {
 
+        JSONArray inputs = (JSONArray) transaction1.get("inputs");
+        String[] prev_hashes = new String[inputs.size()];
+        int[] input_indexes = new int[inputs.size()];
+        int i = 0;
+        for (Object o : inputs) {
+            JSONObject jsonLineItem = (JSONObject) o;
+            String prevTxHash = jsonLineItem.get("prevTxHash").toString();
+            int outputIndex = (int) jsonLineItem.get("outputIndex");
 
+            prev_hashes[i] = prevTxHash;
+            input_indexes[i] = outputIndex;
+            i++;
+        }
+        inputs = (JSONArray) transaction2.get("inputs");
+
+        for (Object o : inputs) {
+            JSONObject jsonLineItem = (JSONObject) o;
+            String prevTxHash = jsonLineItem.get("prevTxHash").toString();
+            int outputIndex = (int) jsonLineItem.get("outputIndex");
+
+            for (int j = 0; j < prev_hashes.length; j++) {
+
+                if (prev_hashes[j].equals(prevTxHash) && input_indexes[j] == outputIndex) {
+                    return true;
+                }
+
+            }
+        }
+        return false ;
+
+    }
+
+    public String getPrevHash_outputindex(JSONObject transaction){
+
+        JSONArray inputs = (JSONArray) transaction.get("inputs");
+        JSONObject input = (JSONObject) inputs.get(0);
+        String prevHash  = input.get("prevTxHash").toString();
+        int outpuindex = (int) input.get("outputIndex");
+
+        return prevHash +","+outpuindex;
+    }
 }
