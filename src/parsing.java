@@ -8,7 +8,7 @@ public class parsing {
     public ArrayList<TransactionFromText> readDataset(){
         try {
             ArrayList<TransactionFromText> transactions = new ArrayList<>();
-            File myObj = new File("testFiles/testAll.txt");
+            File myObj = new File("testFiles/txdataset_v2.txt");
             Scanner myReader = new Scanner(myObj);
             int printIndex = 0;
             while (myReader.hasNextLine()) {
@@ -152,6 +152,13 @@ public class parsing {
     public void createFile(int nodeNumber) throws IOException {
         String path;
         path = "TestFiles\\Node" + nodeNumber + "Transactions.txt";
+        File myObj = new File(path);
+        myObj.createNewFile();
+    }
+
+    public void createSortedFile(int nodeNumber) throws IOException {
+        String path;
+        path = "TestFiles\\Node" + nodeNumber + "SortedTransactions.txt";
         File myObj = new File(path);
         myObj.createNewFile();
     }

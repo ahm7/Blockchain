@@ -18,15 +18,31 @@ import java.sql.Timestamp;
 public class main {
 
      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException {
-         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-         JSONParser parser = new JSONParser();
-         JSONArray a = (JSONArray) parser.parse(new FileReader("testFiles/txs.json"));
-         JSONObject test = (JSONObject) a.get(0);
+         /*Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
-         long r = (long) test.get("inputCounter");
+         int nodeNumber = Integer.parseInt(args[0]);
+         parsing p = new parsing();
+         NodePeers node = p.readPort(nodeNumber);
+         int port = node.getPort();
+         Node n;
+         if(port == 4001){
+             n = new Miner(port);
+         }else{
+             n = new Node(port);
+         }*/
 
 
-         JSONObject trans = new JSONObject();
+
+         /*
+         if(port == 4000){
+             Block b = new Block();
+             b.setMerkleTreeRoot("dummy");
+             PeerToPeer conn = new PeerToPeer();
+             conn.broadcastBlock(b,nodeNumber);
+         }
+          */
+
+         /*JSONObject trans = new JSONObject();
          trans.put("hash","076cab0107c9f06661f3d42fb83719aff7b7d98c04d10176d2268e2dff92a6d9");
          trans.put("inputCounter",1);
          trans.put("signature","[B@43814d18");
@@ -46,27 +62,34 @@ public class main {
          outputs.add(output);
          trans.put("outputs",outputs);
 
+         JSONObject trans2 = new JSONObject();
+         trans2.put("hash","096cab0107c9f06661f3d42fb83719aff7b7d98c04d10176d2268e2dff92a6d9");
+         trans2.put("inputCounter",1);
+         trans2.put("signature","[B@43814d18");
+         trans2.put("outputCounter",1);
+         trans2.put("outputCounter",1);
+         JSONArray inputs2 = new JSONArray();
+         JSONObject input2 = new JSONObject();
+         input2.put("prevTxHash","a6864eb339b0epj6e00d75293a8840abf069a2c0fe82e6e53af6ac099793c1d5");
+         input2.put("outputIndex",-1);
+         inputs2.add(input2);
+         trans2.put("inputs",inputs2);
 
-        /* int nodeNumber = Integer.parseInt(args[0]);
-         parsing p = new parsing();
-         NodePeers node = p.readPort(nodeNumber);
-         int port = node.getPort();
-         Node n = new Node(port);
-         *//*
+         JSONArray outputs2 = new JSONArray();
+         JSONObject output2 = new JSONObject();
+         output2.put("publicKey","ahmed");
+         output2.put("index",1);
+         outputs2.add(output2);
+         trans2.put("outputs",outputs2);
+
+
+
+
          if(port == 4000){
-             Block b = new Block();
-             b.setMerkleTreeRoot("dummy");
              PeerToPeer conn = new PeerToPeer();
-             conn.broadcastBlock(b,nodeNumber);
-         }
 
-
-          *//*
-         if(port == 4000){
-             JSONObject j = new JSONObject();
-             j.put("i","j");
-             PeerToPeer conn = new PeerToPeer();
-             conn.broadcastTx(j,nodeNumber);
+             conn.broadcastTx(trans,nodeNumber);
+             conn.broadcastTx(trans2,nodeNumber);
          }
          n.recBlocks();*/
          /*
@@ -282,6 +305,7 @@ public class main {
          n.validateBlock(b10);
          n.validateBlock(b11);
          */
+        testSortFile();
     }
     public static void testConnection() throws IOException {
         PeerToPeer conn = new PeerToPeer();
@@ -294,6 +318,15 @@ public class main {
             int port = peers.get(i).getPort();
             conn.sendBlock(ip,port,dummy);
         }
+    }
+
+    public static void testSortFile() throws IOException {
+         for(int i = 1;i < 50;i++){
+             parsing p = new parsing();
+             p.createSortedFile(i);
+             SortTextFile sorting = new SortTextFile();
+             sorting.sortTransactionsFile(i);
+         }
     }
 
     public static void testSplitNodeTransactions() throws IOException {
