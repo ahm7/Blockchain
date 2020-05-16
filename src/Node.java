@@ -2,6 +2,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import javax.sound.midi.SysexMessage;
+import java.io.IOException;
 import java.security.*;
 import java.util.*;
 
@@ -47,14 +48,17 @@ public class Node {
         return publicKey;
     }
 
-    public void recBlocks() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public void recBlocks() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
         while(true){
            Object b = s.getBlock();
            if(b != null){
                Class className = b.getClass();
                String name = className.getName();
                if(name.equals("Block")){
-                    validateBlock((Block) b);
+                   NodeSender h = new NodeSender(1,b,this);
+                   Thread thread = new Thread(h);
+                   thread.start();
+
                }else if(name.equals("Vote")){
 
                }else{

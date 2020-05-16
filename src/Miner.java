@@ -1,7 +1,6 @@
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.awt.image.ByteLookupTable;
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
@@ -34,58 +33,26 @@ public class Miner extends Node {
 
 
     }
-    public void recBlocks() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public Map<String,JSONObject> getPendingTrans(){
+        return pending_transactions;
+    }
+    public void recBlocks() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
         while(true){
             Object b = s.getBlock();
             if(b != null){
                 Class className = b.getClass();
                 String name = className.getName();
                 if(name.equals("Block")){
-                    validateBlock((Block) b);
+                    MinerSender h = new MinerSender(1,b,this);
+                    Thread thread = new Thread(h);
+                    thread.start();
+
                 }else if(name.equals("Vote")){
 
                 }else{
-                    JSONObject tx = (JSONObject) b;
-                    boolean valid_trans = this.validateTransaction(tx);
-                    if(valid_trans){
-                        boolean double_spend = false;
-                        JSONArray inputs_array = new JSONArray();
-                        inputs_array = (JSONArray) tx.get("inputs");
-                        JSONObject inputObject = (JSONObject) inputs_array.get(0);
-                        String prev_tx_hash = (String) inputObject.get("prevTxHash");
-                        int  outputIndex = (int) inputObject.get("outputIndex");
-
-                        if(pending_transactions.containsKey(prev_tx_hash)){
-                            JSONArray inputs_array2 = new JSONArray();
-                            inputs_array2 = (JSONArray) pending_transactions.get(prev_tx_hash).get("inputs");
-                            JSONObject inputObject2 = (JSONObject) inputs_array2.get(0);
-                            String prev_tx_hash2 = (String) inputObject.get("prevTxHash");
-                            int  outputIndex2 = (int) inputObject.get("outputIndex");
-
-                            if(prev_tx_hash.equals(prev_tx_hash2) && outputIndex == outputIndex2){
-                                double_spend = true;
-
-                            }
-
-
-
-                        }
-
-                        if(!double_spend){
-                            pending_transactions.put(prev_tx_hash,tx);
-                        }
-                        //pending_transactions.add(tx);
-                        if(pending_transactions.size() == blockSize){
-                            ArrayList<JSONObject> temp = new ArrayList<JSONObject>();
-
-                            for (String key: pending_transactions.keySet()) {
-
-                                temp.add(pending_transactions.get(key));
-                            }
-                            buildBlock(temp);
-                            pending_transactions.clear();
-                        }
-                    }
+                    MinerSender h = new MinerSender(3,b,this);
+                    Thread thread = new Thread(h);
+                    thread.start();
 
 
                 }
@@ -93,7 +60,7 @@ public class Miner extends Node {
         }
     }
 
-    private Block buildBlock(ArrayList<JSONObject> transactions ){
+    public Block buildBlock(ArrayList<JSONObject> transactions ){
         Block b = new Block();
         Timestamp time = new Timestamp(System.currentTimeMillis());
         b.setPreviousBlockHash(this.prevBlockHash);
