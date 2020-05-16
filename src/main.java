@@ -18,7 +18,7 @@ import java.sql.Timestamp;
 public class main {
 
      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException {
-         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+         //Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
          /*System.out.println(args[0]);
          int nodeNumber = Integer.parseInt(args[0]);
@@ -65,7 +65,7 @@ public class main {
          file.close();
         //testSplitNodeTransactions();
 */
-         testTransactionsWithBlock();
+        //testTransactionsWithBlock();
 /*         Node n = new Node();
          Timestamp time = new Timestamp(System.currentTimeMillis());
 
@@ -227,6 +227,8 @@ public class main {
          n.validateBlock(b10);
          n.validateBlock(b11);
          */
+
+         //testSortFile();
     }
     public static void testConnection() throws IOException {
         PeerToPeer conn = new PeerToPeer();
@@ -239,6 +241,15 @@ public class main {
             int port = peers.get(i).getPort();
             conn.sendBlock(ip,port,dummy);
         }
+    }
+
+    public static void testSortFile() throws IOException {
+         for(int i = 1;i < 50;i++){
+             parsing p = new parsing();
+             p.createSortedFile(i);
+             SortTextFile sorting = new SortTextFile();
+             sorting.sortTransactionsFile(i);
+         }
     }
 
     public static void testSplitNodeTransactions() throws IOException {

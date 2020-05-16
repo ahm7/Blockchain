@@ -156,4 +156,11 @@ public class parsing {
         myObj.createNewFile();
     }
 
+    public void createSortedFile(int nodeNumber) throws IOException {
+        String path;
+        path = "TestFiles\\Node" + nodeNumber + "SortedTransactions.txt";
+        File myObj = new File(path);
+        myObj.createNewFile();
+    }
+
 }
