@@ -18,7 +18,7 @@ import java.sql.Timestamp;
 public class main {
 
      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException {
-         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+         /*Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
          int nodeNumber = Integer.parseInt(args[0]);
          parsing p = new parsing();
@@ -29,7 +29,7 @@ public class main {
              n = new Miner(port);
          }else{
              n = new Node(port);
-         }
+         }*/
 
 
 
@@ -42,7 +42,7 @@ public class main {
          }
           */
 
-         JSONObject trans = new JSONObject();
+         /*JSONObject trans = new JSONObject();
          trans.put("hash","076cab0107c9f06661f3d42fb83719aff7b7d98c04d10176d2268e2dff92a6d9");
          trans.put("inputCounter",1);
          trans.put("signature","[B@43814d18");
@@ -91,7 +91,7 @@ public class main {
              conn.broadcastTx(trans,nodeNumber);
              conn.broadcastTx(trans2,nodeNumber);
          }
-         n.recBlocks();
+         n.recBlocks();*/
          /*
          Block b = new Block();
          Class className = b.getClass();
@@ -305,6 +305,7 @@ public class main {
          n.validateBlock(b10);
          n.validateBlock(b11);
          */
+        testSortFile();
     }
     public static void testConnection() throws IOException {
         PeerToPeer conn = new PeerToPeer();
@@ -317,6 +318,15 @@ public class main {
             int port = peers.get(i).getPort();
             conn.sendBlock(ip,port,dummy);
         }
+    }
+
+    public static void testSortFile() throws IOException {
+         for(int i = 1;i < 50;i++){
+             parsing p = new parsing();
+             p.createSortedFile(i);
+             SortTextFile sorting = new SortTextFile();
+             sorting.sortTransactionsFile(i);
+         }
     }
 
     public static void testSplitNodeTransactions() throws IOException {
