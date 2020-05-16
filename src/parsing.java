@@ -8,7 +8,7 @@ public class parsing {
     public ArrayList<TransactionFromText> readDataset(){
         try {
             ArrayList<TransactionFromText> transactions = new ArrayList<>();
-            File myObj = new File("TestFiles\\txdataset_v2.txt");
+            File myObj = new File("testFiles/testAll.txt");
             Scanner myReader = new Scanner(myObj);
             int printIndex = 0;
             while (myReader.hasNextLine()) {
@@ -50,6 +50,7 @@ public class parsing {
                     transaction.setInputs(inputs);
                     transaction.setOutputs(outputs);
                     transactions.add(transaction);
+
                 }
                 printIndex++;
             }
@@ -103,7 +104,7 @@ public class parsing {
     }
 
     public void writeNodeTransactions() throws IOException {
-        File myObj = new File("TestFiles\\txdataset_v2.txt");
+        File myObj = new File("testFiles/txdataset_v2.txt");
         Scanner myReader = new Scanner(myObj);
         int printIndex = 0;
         while (myReader.hasNextLine()) {
@@ -114,7 +115,7 @@ public class parsing {
                 String[] parsedInput = parseString(parsedTransaction[1], ":");
                 int nodeNumber = Integer.parseInt(parsedInput[1]);
                 String path = "";
-                path = "TestFiles\\Node" + nodeNumber + "Transactions.txt";
+                path = "testFiles/Node" + nodeNumber + "Transactions.txt";
                 Writer output;
                 output = new BufferedWriter(new FileWriter(path, true));
                 String line = data + "\n";

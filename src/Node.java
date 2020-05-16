@@ -25,6 +25,7 @@ public class Node {
     private Map<String,JSONObject> UTXO_list = new HashMap<String,JSONObject>();
     private Map<String,JSONObject> temp_UTXO_list = new HashMap<String,JSONObject>();
     ArrayList<PublicKey> publicKeys;
+    private ArrayList<Block> blockChain = new ArrayList<Block>();
 
     int maxLength = 0;
     int maxIndex = 0;
@@ -48,14 +49,15 @@ public class Node {
 
 
     public void validateBlock(Block b)  throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        ArrayList<transaction> blockTransaction = b.getTransactions();
+        ArrayList<JSONObject> blockTransaction = b.getTransactions();
         boolean valid = true;
-        for(int i = 0 ; i < blockTransaction.size() ; i++){
-            valid = validateTransaction(blockTransaction.get(i).getTransactionObject());
+       for(int i = 0 ; i < blockTransaction.size() ; i++){
+            valid = validateTransaction(blockTransaction.get(i));
             if(!valid){
                 break;
             }
         }
+       System.out.println(valid);
         if(valid){
             if(pendingBlocks.size() == 0){
                 ArrayList<Block> temp = new ArrayList<Block>();
@@ -100,7 +102,7 @@ public class Node {
                 }
             }
 
-            if(maxLength > 6){
+            if(maxLength > 2){
                 Block safeBlock = pendingBlocks.get(maxIndex).get(0);
                 String safeblockHashValue = "";
                 safeblockHashValue += safeBlock.getPreviousBlockHash();
@@ -108,7 +110,8 @@ public class Node {
                 safeblockHashValue += safeBlock.getTimestamp();
                 safeblockHashValue += safeBlock.getNonce();
                 // chain.add(safeBlock);
-              
+                addToBlockchain(false,safeBlock);
+
                 for(int i = 0 ; i <  pendingBlocks.size(); i++){
                     Block temp = pendingBlocks.get(i).get(0);
                     String blockHashValue = "";
@@ -129,7 +132,7 @@ public class Node {
         }
         for(int i = 0; i < pendingBlocks.size() ; i++){
             for(int j = 0 ; j < pendingBlocks.get(i).size() ; j++){
-                System.out.print(pendingBlocks.get(i).get(j).getMerkleTreeRoot() + " ");
+                System.out.print(pendingBlocks.get(i).get(j).getNonce() + " ");
             }
             System.out.println("");
         }
@@ -208,7 +211,7 @@ public class Node {
        boolean IS_UTXO = isUnSpend(transaction);
 
        boolean singnatur_is_right = false ;
-        if(IS_UTXO ){
+        if(IS_UTXO){
             singnatur_is_right = validateSignature(transaction);
         }
        //boolean value_is_valid = validValue(transaction);
@@ -235,9 +238,8 @@ public class Node {
                 if((int)used_outputs.get(""+outputIndex)==0){
                     return false;
                 }
-            }
-
-
+            }else{
+                return false;            }
         }
 
 
@@ -272,6 +274,23 @@ public class Node {
         }
 
 return true ;
+
+    }
+
+    public  void  addToBlockchain(boolean isfirst , Block block){
+
+        blockChain.add(block);
+
+
+        ArrayList<JSONObject> transactions = block.getTransactions();
+
+        for(int i=0;i<transactions.size();i++){
+            if(!isfirst){
+            update_UTXO(transactions.get(i));
+            }
+            add_UTXO(transactions.get(i));
+        }
+
 
     }
 
