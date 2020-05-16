@@ -108,7 +108,7 @@ public class Node {
                 safeblockHashValue += safeBlock.getTimestamp();
                 safeblockHashValue += safeBlock.getNonce();
                 // chain.add(safeBlock);
-              
+
                 for(int i = 0 ; i <  pendingBlocks.size(); i++){
                     Block temp = pendingBlocks.get(i).get(0);
                     String blockHashValue = "";
