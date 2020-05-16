@@ -20,6 +20,34 @@ public class main {
      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException {
          Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
+         int nodeNumber = Integer.parseInt(args[0]);
+         parsing p = new parsing();
+         NodePeers node = p.readPort(nodeNumber);
+         int port = node.getPort();
+         Node n = new Node(port);
+         /*
+         if(port == 4000){
+             Block b = new Block();
+             b.setMerkleTreeRoot("dummy");
+             PeerToPeer conn = new PeerToPeer();
+             conn.broadcastBlock(b,nodeNumber);
+         }
+
+
+          */
+         if(port == 4000){
+             JSONObject j = new JSONObject();
+             j.put("i","j");
+             PeerToPeer conn = new PeerToPeer();
+             conn.broadcastTx(j,nodeNumber);
+         }
+         n.recBlocks();
+         /*
+         Block b = new Block();
+         Class className = b.getClass();
+         System.out.println(className.getName());
+       */
+
          /*System.out.println(args[0]);
          int nodeNumber = Integer.parseInt(args[0]);
          parsing p = new parsing();
@@ -65,7 +93,7 @@ public class main {
          file.close();
         //testSplitNodeTransactions();
 */
-         testTransactionsWithBlock();
+         //testTransactionsWithBlock();
 /*         Node n = new Node();
          Timestamp time = new Timestamp(System.currentTimeMillis());
 
@@ -250,7 +278,7 @@ public class main {
     }
 
     public static void testCreateTransaction() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, FileNotFoundException {
-        Node node = new Node();
+        Node node = new Node(1);
         PublicKey publicKey = node.getPublicKey();
         PrivateKey privateKey = node.getPrivateKey();
 
@@ -310,7 +338,7 @@ public class main {
         // initialize 50 nodes
         Node[] nodes = new Node[50];
         for(int i=0;i<nodes.length;i++){
-            nodes[i] = new Node();
+            nodes[i] = new Node(1);
         }
 
         ArrayList<JSONObject> transactions_objects = new ArrayList<JSONObject>();
@@ -379,7 +407,7 @@ public class main {
         System.out.println(transactions_objects.size());
 
 
-        Node n = new Node();
+        Node n = new Node(1);
         Timestamp time = new Timestamp(System.currentTimeMillis());
 
         Block b0 = new Block();

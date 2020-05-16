@@ -3,10 +3,7 @@ import org.json.simple.JSONObject;
 
 import javax.sound.midi.SysexMessage;
 import java.security.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 public class Node {
 
@@ -30,11 +27,18 @@ public class Node {
     int maxLength = 0;
     int maxIndex = 0;
     private ArrayList<ArrayList<Block>> pendingBlocks = new ArrayList<ArrayList<Block>>();
+    Server s = null;
 
-    public void  Node(){
+    public Node(int portNum){
+        generateKeyPair();
         //this.UTXO_list = new HashMap<String,JSONObject>();
         this.publicKeys = new ArrayList<>();
+        s = new Server(portNum);
+        Thread thread = new Thread(s);
+        thread.start();
+
     }
+
     public PrivateKey getPrivateKey() {
         return privateKey;
     }
@@ -43,8 +47,21 @@ public class Node {
         return publicKey;
     }
 
-    public Node(){
-        generateKeyPair();
+    public void recBlocks() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        while(true){
+           Object b = s.getBlock();
+           if(b != null){
+               Class className = b.getClass();
+               String name = className.getName();
+               if(name.equals("Block")){
+                    validateBlock((Block) b);
+               }else if(name.equals("Vote")){
+
+               }else{
+                   System.out.println(b);
+               }
+           }
+        }
     }
 
 
