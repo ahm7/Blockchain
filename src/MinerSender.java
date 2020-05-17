@@ -71,8 +71,9 @@ public class MinerSender extends Thread{
             m.all_invalid_prevtransactions.clear();
             m.all_valid_transactions = new HashMap(m.branches_transactions.get(m.choosed_branch));
             transaction t = new transaction();
+            List<String> keys = new ArrayList<String>(m.all_valid_transactions.keySet());
             for(int p=0;p<m.all_valid_transactions.size();p++){
-                String prevHash_outputindex = t.getPrevHash_outputindex(m.all_valid_transactions.get(p));
+                String prevHash_outputindex = t.getPrevHash_outputindex(m.all_valid_transactions.get(keys.get(p)));
                 String prevhash = prevHash_outputindex.split(",")[0];
                 String outputindex = prevHash_outputindex.split(",")[1];
                 m.all_invalid_prevtransactions.put(prevhash+outputindex,Integer.parseInt(outputindex));
