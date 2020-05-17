@@ -2,6 +2,7 @@ import com.sun.jdi.Value;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import javax.swing.*;
 import java.awt.image.ByteLookupTable;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -15,12 +16,12 @@ public class Miner extends Node {
 
     public  String prevBlockHash ;
     public  int  difficulty  = 2;
-    //private ArrayList<JSONObject> pending_transactions = new ArrayList<JSONObject>();
     public Map<String,JSONObject> pending_transactions  = new HashMap<String,JSONObject>();
     public Map<String,JSONObject> all_valid_transactions  = new HashMap<String,JSONObject>();
     public Map<String,Integer> all_invalid_prevtransactions  = new HashMap<String,Integer>();
-    //private Map<String,JSONObject> pending_transactions  = new HashMap<String,JSONObject>();
+    ArrayList<Map<String,JSONObject>> branches_transactions = new ArrayList<Map<String,JSONObject>>();
     public  int blockSize = 2;
+    public int choosed_branch = 0;
     public Miner(int portNum) {
         super(portNum);
     }
@@ -36,8 +37,8 @@ public class Miner extends Node {
 
     public void  mine (){
 
-
     }
+
 
     public void recBlocks() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         while(true){
@@ -101,24 +102,150 @@ public class Miner extends Node {
     }
 
 
-    public  boolean isBLockHasTheRightTransactions(Block block){
+
+    public int  chooseBlockToMineOnTopOfIt(){
 
 
-         ArrayList<JSONObject> transactions  = block.getTransactions();
-
-
-         for(int i=0;i<transactions.size();i++) {
-
-             if (!pending_transactions.containsKey(transactions.get(i))) {
-
-                 return false;
-             }
-
-         }
-
-
-         return true;
+        int max = 0;
+        int max_index=0;
+        for(int i=0;i< pendingBlocks.size();i++){
+            if(pendingBlocks.get(i).size() > max){
+                max  = pendingBlocks.get(i).size();
+                max_index=i;
+            }
+        }
+        this.choosed_branch = max_index;
+        String hash = "";
+        String blockHashValue1 = "";
+        Block b = pendingBlocks.get(max_index).get(pendingBlocks.get(max_index).size()-1);
+        blockHashValue1 += b.getPreviousBlockHash();
+        blockHashValue1 += b.getMerkleTreeRoot();
+        blockHashValue1 += b.getTimestamp();
+        blockHashValue1 += b.getNonce();
+        this.prevBlockHash = blockHashValue1;
+        return max_index;
     }
+
+
+    public void validateBlock(Block b)  throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        ArrayList<JSONObject> blockTransaction = b.getTransactions();
+        boolean valid = true;
+        for(int i = 0 ; i < blockTransaction.size() ; i++){
+            valid = validateTransaction(blockTransaction.get(i));
+            if(!valid){
+                break;
+            }
+        }
+        System.out.println(valid);
+        if(valid){
+            if(pendingBlocks.size() == 0){
+                ArrayList<Block> temp = new ArrayList<Block>();
+                Map<String,JSONObject>  temp1= new HashMap<String,JSONObject>();
+                for(int i=0; i<b.getTransactions().size();i++){
+                    temp1.put(b.getTransactions().get(i).get("hash").toString(),b.getTransactions().get(i));
+                }
+
+                branches_transactions.add(temp1);
+                temp.add(b);
+                pendingBlocks.add(temp);
+
+            }
+            int size = pendingBlocks.size();
+            for(int i = 0 ; i < size; i++){
+                int listSize = pendingBlocks.get(i).size();
+                for(int j = 0 ; j < listSize; j++){
+                    Block temp = pendingBlocks.get(i).get(j);
+                    String blockHashValue = "";
+                    blockHashValue += temp.getPreviousBlockHash();
+                    blockHashValue += temp.getMerkleTreeRoot();
+                    blockHashValue += temp.getTimestamp();
+                    blockHashValue += temp.getNonce();
+                    //System.out.println(blockHashValue );
+                    //System.out.println(b.getPreviousBlockHash());
+                    //System.out.println(pendingBlocks.size());
+                    if(blockHashValue.equals(b.getPreviousBlockHash()) && j != listSize - 1){
+                        ArrayList<Block> collisionList = new ArrayList<Block>();
+                        for(int z = 0 ; z <= j ; z++){
+                            collisionList.add(pendingBlocks.get(i).get(z));
+                        }
+                        // add block transaction to this branch
+                        Map<String,JSONObject>  temp1= new HashMap(branches_transactions.get(i));
+
+                        for(int k=0; k<b.getTransactions().size();i++){
+                            temp1.put(b.getTransactions().get(i).get("hash").toString(),b.getTransactions().get(i));
+                        }
+
+                        branches_transactions.add(temp1);
+                        collisionList.add(b);
+                        if(collisionList.size() > maxLength) {
+                            maxLength = collisionList.size();
+                            maxIndex = pendingBlocks.size();
+                        }
+                        pendingBlocks.add(collisionList);
+                        break;
+                    }else if(blockHashValue.equals(b.getPreviousBlockHash()) && j == listSize - 1){
+                        pendingBlocks.get(i).add(b);
+
+                        for(int k=0; k<b.getTransactions().size();i++){
+                            branches_transactions.get(i).put(b.getTransactions().get(i).get("hash").toString(),b.getTransactions().get(i));
+                        }
+
+                        if(pendingBlocks.get(i).size() > maxLength){
+                            maxLength = pendingBlocks.get(i).size();
+                            maxIndex = i;
+                        }
+                        break;
+                    }
+
+                }
+            }
+
+            if(maxLength > 2){
+                Block safeBlock = pendingBlocks.get(maxIndex).get(0);
+                String safeblockHashValue = "";
+                safeblockHashValue += safeBlock.getPreviousBlockHash();
+                safeblockHashValue += safeBlock.getMerkleTreeRoot();
+                safeblockHashValue += safeBlock.getTimestamp();
+                safeblockHashValue += safeBlock.getNonce();
+                // chain.add(safeBlock);
+                addToBlockchain(false,safeBlock);
+
+
+
+                for(int i = 0 ; i <  pendingBlocks.size(); i++){
+                    Block temp = pendingBlocks.get(i).get(0);
+                    String blockHashValue = "";
+                    blockHashValue += temp.getPreviousBlockHash();
+                    blockHashValue += temp.getMerkleTreeRoot();
+                    blockHashValue += temp.getTimestamp();
+                    blockHashValue += temp.getNonce();
+                    if(safeblockHashValue.equals(blockHashValue)){
+                        pendingBlocks.get(i).remove(0);
+
+                        for(int u=0;u<safeBlock.getTransactions().size();u++){
+                            branches_transactions.get(i).remove(safeBlock.getTransactions().get(u).get("hash"));
+                        }
+                    }else{
+                        pendingBlocks.remove(i);
+                        branches_transactions.remove(i);
+                        i--;
+                    }
+                }
+                maxLength = maxLength - 1;
+            }
+
+        }
+        for(int i = 0; i < pendingBlocks.size() ; i++){
+            for(int j = 0 ; j < pendingBlocks.get(i).size() ; j++){
+                System.out.print(pendingBlocks.get(i).get(j).getNonce() + " ");
+            }
+            System.out.println("");
+        }
+        System.out.println(maxLength);
+        System.out.println(maxIndex);
+
+    }
+
 
 
 
