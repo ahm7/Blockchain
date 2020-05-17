@@ -1,10 +1,11 @@
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import javax.sound.midi.SysexMessage;
 import java.io.IOException;
 import java.security.*;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Node {
 
@@ -29,6 +30,7 @@ public class Node {
     int maxIndex = 0;
     private ArrayList<ArrayList<Block>> pendingBlocks = new ArrayList<ArrayList<Block>>();
     Server s = null;
+    Lock lock = new ReentrantLock();
 
 
     public Node(int portNum){

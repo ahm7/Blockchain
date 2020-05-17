@@ -28,8 +28,10 @@ public class MinerSender extends Thread{
 
 
             }else if(methodType == 3){
+                m.lock.lock();
                 JSONObject tx = (JSONObject) b;
                 boolean valid_trans = m.validateTransaction(tx);
+                valid_trans = true;
                 if(valid_trans){
                     boolean double_spend = false;
                     JSONArray inputs_array = new JSONArray();
@@ -60,9 +62,13 @@ public class MinerSender extends Thread{
                         m.pending_transactions.put(hash,tx);
                         m.all_valid_transactions.put(hash,tx);
                         m.all_invalid_prevtransactions.put(prev_tx_hash+string_outputIndex,outputIndex);
+                        System.out.println("Hash " + hash);
+                        System.out.println("prev tx + "  + prev_tx_hash + string_outputIndex);
                     }
                     //pending_transactions.add(tx);
                     if(m.pending_transactions.size() == m.blockSize){
+                        System.out.println(tx);
+
                         ArrayList<JSONObject> temp = new ArrayList<JSONObject>();
 
                         for (String key: m.pending_transactions.keySet()) {
@@ -72,11 +78,14 @@ public class MinerSender extends Thread{
                         Block bb = m.buildBlock(temp);
                         PeerToPeer conn = new PeerToPeer();
                         conn.broadcastBlock(bb,2);
-                        System.out.println(bb.getNonce());
+                        System.out.println(" pending size "+m.pending_transactions.size());
+                        System.out.println("all valid size " + m.all_valid_transactions.size());
+                        System.out.println("all invalid size " + m.all_invalid_prevtransactions.size());
+                        System.out.println("Nonce " + bb.getNonce());
                         m.pending_transactions.clear();
                     }
                 }
-
+                m.lock.unlock();
 
                     }
                 } catch (NoSuchAlgorithmException e) {

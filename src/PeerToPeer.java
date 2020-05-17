@@ -19,7 +19,7 @@ public class PeerToPeer {
         System.out.println("Connected with "+ peerIP+ "!");
         OutputStream outputStream = socket.getOutputStream();
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-        System.out.println("Sending Block to the Socket "+ peerIP + " on port " + b);
+        System.out.println("Sending Block to the Socket "+ peerIP + " on port " + portNum);
         objectOutputStream.writeObject(b);
         System.out.println("Connection with "+ peerIP+ " closed !");
         socket.close();

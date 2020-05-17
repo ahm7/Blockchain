@@ -18,7 +18,7 @@ import java.sql.Timestamp;
 public class main {
 
      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException {
-         /*Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
          int nodeNumber = Integer.parseInt(args[0]);
          parsing p = new parsing();
@@ -29,20 +29,21 @@ public class main {
              n = new Miner(port);
          }else{
              n = new Node(port);
-         }*/
-
-
-
+         }
          /*
          if(port == 4000){
              Block b = new Block();
              b.setMerkleTreeRoot("dummy");
              PeerToPeer conn = new PeerToPeer();
-             conn.broadcastBlock(b,nodeNumber);
+
+            conn.broadcastBlock(b,nodeNumber);
          }
+
           */
 
-         /*JSONObject trans = new JSONObject();
+
+
+         JSONObject trans = new JSONObject();
          trans.put("hash","076cab0107c9f06661f3d42fb83719aff7b7d98c04d10176d2268e2dff92a6d9");
          trans.put("inputCounter",1);
          trans.put("signature","[B@43814d18");
@@ -91,7 +92,7 @@ public class main {
              conn.broadcastTx(trans,nodeNumber);
              conn.broadcastTx(trans2,nodeNumber);
          }
-         n.recBlocks();*/
+         n.recBlocks();
          /*
          Block b = new Block();
          Class className = b.getClass();
