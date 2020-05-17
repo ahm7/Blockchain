@@ -28,14 +28,14 @@ public class MinerSender extends Thread{
     {
         try{
             if(methodType == 1){
-                //m.lock.lock();
+                m.lock.lock();
                 m.validateBlock((Block) b);
                 int temp_branch_num = m.choosed_branch;
                 int temp2 = m.chooseBlockToMineOnTopOfIt();
                 if(temp_branch_num != temp2){
                     m.branchChanged = true;
                 }
-                //m.lock.unlock();
+                m.lock.unlock();
 
 
             }else if(methodType == 2){
@@ -119,6 +119,7 @@ public class MinerSender extends Thread{
                         if(m.newBlockArrived && bb == null){
                          System.out.println(" ANA D5LT fl condition l 8lat");
                             m.newBlockArrived = false;
+                            // 3eed tany l process
                         }else {
                             if(m.pendingBlocks.size()>0){
                                 m.pendingBlocks.get(m.maxIndex).add(bb);

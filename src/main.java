@@ -98,16 +98,17 @@ public class main {
          ArrayList<Block> blocks  = new ArrayList<Block>();
          int k =0;
          String blockHashValue1 = "";
-         for(int i=0;i<6;i++){
+         Timestamp time = new Timestamp(50);
 
+         for(int i=0;i<6;i++){
              ArrayList<JSONObject> transaction = new ArrayList<JSONObject>();
              transaction.add(transactions.get(k));
              k++;
              transaction.add(transactions.get(k));
              k++;
              Block b0 = new Block();
-             Timestamp time = new Timestamp(System.currentTimeMillis());
-             b0.setNonce(20);
+
+             b0.setNonce(i);
              b0.setTransactions(transaction);
              b0.generateBlockHash();
              b0.setTimestamp(time);
@@ -119,6 +120,7 @@ public class main {
              blockHashValue1 += b0.getNonce();
              SHA256 hash = new SHA256();
              blockHashValue1 = hash.generateHash(blockHashValue1);
+             System.out.println(i + " EL hash bt3ha  : " + blockHashValue1);
 
              blocks.add(b0);
          }

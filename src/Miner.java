@@ -113,6 +113,8 @@ public class Miner extends Node {
         blockHashValue1 += b.getMerkleTreeRoot();
         blockHashValue1 += b.getTimestamp();
         blockHashValue1 += b.getNonce();
+        SHA256 hash2 = new SHA256();
+        blockHashValue1 = hash2.generateHash(blockHashValue1);
         this.prevBlockHash = blockHashValue1;
         return max_index;
     }
@@ -128,6 +130,9 @@ public class Miner extends Node {
         blockHashValuee += b.getMerkleTreeRoot();
         blockHashValuee += b.getTimestamp();
         blockHashValuee += b.getNonce();
+        SHA256 hash2 = new SHA256();
+        blockHashValuee = hash2.generateHash(blockHashValuee);
+
         //boolean valid = checkNonce(blockHashValuee);
         boolean valid = true;
         if(valid){
@@ -157,11 +162,14 @@ public class Miner extends Node {
                 pendingBlocks.add(temp);
                 chooseBlockToMineOnTopOfIt();
                 newBlockArrived = true;
+                maxLength = 1;
+                maxIndex = 0;
 
             }
             int size = pendingBlocks.size();
             for(int i = 0 ; i < size; i++){
                 int listSize = pendingBlocks.get(i).size();
+                System.out.println("EL list rqm " + i + " El size bt3ha : " + listSize);
                 for(int j = 0 ; j < listSize; j++){
                     Block temp = pendingBlocks.get(i).get(j);
                     String blockHashValue = "";
@@ -169,10 +177,13 @@ public class Miner extends Node {
                     blockHashValue += temp.getMerkleTreeRoot();
                     blockHashValue += temp.getTimestamp();
                     blockHashValue += temp.getNonce();
+                    SHA256 hash = new SHA256();
+                    blockHashValue = hash.generateHash(blockHashValue);
                     //System.out.println(blockHashValue );
                     //System.out.println(b.getPreviousBlockHash());
                     //System.out.println(pendingBlocks.size());
                     if(blockHashValue.equals(b.getPreviousBlockHash()) && j != listSize - 1){
+                        System.out.println("L2et el prev block bs feh collision");
                         ArrayList<Block> collisionList = new ArrayList<Block>();
                         for(int z = 0 ; z <= j ; z++){
                             collisionList.add(pendingBlocks.get(i).get(z));
@@ -180,8 +191,8 @@ public class Miner extends Node {
                         // add block transaction to this branch
                         Map<String,JSONObject>  temp1= new HashMap(branches_transactions.get(i));
 
-                        for(int k=0; k<b.getTransactions().size();i++){
-                            temp1.put(b.getTransactions().get(i).get("hash").toString(),b.getTransactions().get(i));
+                        for(int k=0; k<b.getTransactions().size();k++){
+                            temp1.put(b.getTransactions().get(k).get("hash").toString(),b.getTransactions().get(k));
                         }
 
                         branches_transactions.add(temp1);
@@ -195,12 +206,13 @@ public class Miner extends Node {
                         newBlockArrived = true;
                         break;
                     }else if(blockHashValue.equals(b.getPreviousBlockHash()) && j == listSize - 1){
+                        System.out.println("L2et el prev block w 7azwdha fl list");
                         pendingBlocks.get(i).add(b);
                         chooseBlockToMineOnTopOfIt();
                         newBlockArrived = true;
 
-                        for(int k=0; k<b.getTransactions().size();i++){
-                            branches_transactions.get(i).put(b.getTransactions().get(i).get("hash").toString(),b.getTransactions().get(i));
+                        for(int k=0; k<b.getTransactions().size();k++){
+                            branches_transactions.get(i).put(b.getTransactions().get(k).get("hash").toString(),b.getTransactions().get(k));
                         }
 
                         if(pendingBlocks.get(i).size() > maxLength){
@@ -220,6 +232,8 @@ public class Miner extends Node {
                 safeblockHashValue += safeBlock.getMerkleTreeRoot();
                 safeblockHashValue += safeBlock.getTimestamp();
                 safeblockHashValue += safeBlock.getNonce();
+                SHA256 hash = new SHA256();
+                safeblockHashValue = hash.generateHash(safeblockHashValue);
                 // chain.add(safeBlock);
                 addToBlockchain(false,safeBlock);
 
@@ -232,6 +246,8 @@ public class Miner extends Node {
                     blockHashValue += temp.getMerkleTreeRoot();
                     blockHashValue += temp.getTimestamp();
                     blockHashValue += temp.getNonce();
+                    hash = new SHA256();
+                    blockHashValue = hash.generateHash(blockHashValue);
                     if(safeblockHashValue.equals(blockHashValue)){
                         pendingBlocks.get(i).remove(0);
 
