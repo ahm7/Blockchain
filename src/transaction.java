@@ -119,7 +119,7 @@ public class transaction {
     }
 
     public String getPrevHash_outputindex(JSONObject transaction){
-
+        System.out.println(transaction);
         JSONArray inputs = (JSONArray) transaction.get("inputs");
         JSONObject input = (JSONObject) inputs.get(0);
         String prevHash  = input.get("prevTxHash").toString();

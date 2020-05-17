@@ -138,8 +138,10 @@ public class main {
          if(port == 4000){
               PeerToPeer conn = new PeerToPeer();
 
-              conn.broadcastTx(transactions.get(13),nodeNumber);
-              conn.broadcastTx(transactions.get(14),nodeNumber);
+              conn.broadcastTx(transactions.get(15),nodeNumber);
+              System.out.println(transactions.get(15).get("hash"));
+              conn.broadcastTx(transactions.get(16),nodeNumber);
+             System.out.println(transactions.get(16).get("hash"));
          }
 
 /*

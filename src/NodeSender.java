@@ -19,8 +19,9 @@ public class NodeSender extends Thread{
     {
         try{
             if(methodType == 1){
+                n.lock.lock();
                 n.validateBlock((Block) b);
-
+                n.lock.unlock();
             }else if(methodType == 2){
 
 

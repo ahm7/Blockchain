@@ -60,8 +60,7 @@ public class Node {
 
     public boolean checkNonce(String concat){
         boolean check = true;
-        SHA256 hash = new SHA256();
-        String hashedHeader = hash.generateHash(concat);
+        String hashedHeader = concat;
         int index = 0;
         while (index < difficulty) {
 
@@ -82,8 +81,15 @@ public class Node {
         blockHashValuee += b.getMerkleTreeRoot();
         blockHashValuee += b.getTimestamp();
         blockHashValuee += b.getNonce();
-        boolean valid = true;
+        SHA256 hash = new SHA256();
+        blockHashValuee = hash.generateHash(blockHashValuee);
+
+
+        boolean valid = checkNonce(blockHashValuee);
+
+        //boolean valid = true;
         if(valid){
+            System.out.println("73ml validation lel transactions ");
             for(int i = 0 ; i < blockTransaction.size() ; i++){
                 valid = validateTransaction(blockTransaction.get(i));
                 if(!valid){
@@ -97,8 +103,15 @@ public class Node {
         //System.out.println("prev hash " + b.getPreviousBlockHash());
         //System.out.println("nonce " + b.getNonce());
         if(valid){
-            PeerToPeer conn = new PeerToPeer();
-            conn.broadcastBlock(b,nodeNumber);
+            try{
+                System.out.println("d5lt henaaaaaaaa2");
+                PeerToPeer conn = new PeerToPeer();
+                conn.broadcastBlock(b,nodeNumber);
+                System.out.println("d5lt henaaaaaaaa");
+            }catch(Exception e){
+
+            }
+
             if(pendingBlocks.size() == 0){
                 ArrayList<Block> temp = new ArrayList<Block>();
                 temp.add(b);
@@ -115,6 +128,8 @@ public class Node {
                     blockHashValue += temp.getMerkleTreeRoot();
                     blockHashValue += temp.getTimestamp();
                     blockHashValue += temp.getNonce();
+                    SHA256 hash2 = new SHA256();
+                    blockHashValue = hash2.generateHash(blockHashValue);
                     //System.out.println(blockHashValue );
                     //System.out.println(b.getPreviousBlockHash());
                     //System.out.println(pendingBlocks.size());
@@ -150,6 +165,8 @@ public class Node {
                 safeblockHashValue += safeBlock.getTimestamp();
                 safeblockHashValue += safeBlock.getNonce();
                 // chain.add(safeBlock);
+                SHA256 hash2 = new SHA256();
+                safeblockHashValue = hash2.generateHash(safeblockHashValue);
                 addToBlockchain(false,safeBlock);
 
                 for(int i = 0 ; i <  pendingBlocks.size(); i++){
@@ -159,6 +176,9 @@ public class Node {
                     blockHashValue += temp.getMerkleTreeRoot();
                     blockHashValue += temp.getTimestamp();
                     blockHashValue += temp.getNonce();
+                    SHA256 hash3 = new SHA256();
+                    blockHashValue = hash3.generateHash(blockHashValue);
+
                     if(safeblockHashValue.equals(blockHashValue)){
                         pendingBlocks.get(i).remove(0);
                     }else{

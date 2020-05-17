@@ -64,7 +64,7 @@ public class MinerSender extends Thread{
 
 
         if(m.branchChanged){
-            System.out.println("is branch changed :"+ m.branches_transactions);
+            System.out.println("is branch changed :"+ m.branches_transactions.size());
             //m.pending_transactions.clear();
 
             m.all_valid_transactions.clear();
@@ -86,12 +86,17 @@ public class MinerSender extends Thread{
         // if it's not a new transaction filter pending list
         if(!isnewTransaction) {
             System.out.println("FILTRING PENDING LIST");
+            System.out.println("PEnding size : " + m.pending_transactions.size());
             List<String> keys = new ArrayList<String>(m.pending_transactions.keySet());
             for (int i = 0; i < m.pending_transactions.size(); i++) {
                 if (m.all_valid_transactions.containsKey(keys.get(i))) {
+                    System.out.println("Deleting transaction number " + i + " KEy " + keys.get(i));
+
                     m.pending_transactions.remove(keys.get(i));
                 }
             }
+            System.out.println("PEnding size : " + m.pending_transactions.size());
+
         }
         JSONObject tx = (JSONObject) b;
         System.out.println("BLOCK CHAIN SIZE : " + m.blockChain.size());
@@ -163,6 +168,7 @@ public class MinerSender extends Thread{
                 if(m.newBlockArrived && bb == null){
                     System.out.println("ANA D5LT fl condition l 8lat");
                     m.newBlockArrived = false;
+                    m.branchChanged = true;
                     recieveTransactionHandling(false);
 
                 }else {
