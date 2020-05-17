@@ -67,6 +67,8 @@ public class Miner extends Node {
     }
     public  void  addToBlockchain(boolean isfirst , Block block){
 
+        System.out.println("ADD  to BLOCKCHAIN " + block.getNonce());
+
         this.blockChain.add(block);
 
         ArrayList<JSONObject> transactions = block.getTransactions();
@@ -117,6 +119,9 @@ public class Miner extends Node {
 
 
     public void validateBlock(Block b) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
+        System.out.println("Enter validate block");
+        System.out.println("Pneding block size : " + pendingBlocks.size());
+        System.out.println("prev block hash " + b.getPreviousBlockHash());
         ArrayList<JSONObject> blockTransaction = b.getTransactions();
         String blockHashValuee = "";
         blockHashValuee += b.getPreviousBlockHash();
@@ -134,6 +139,8 @@ public class Miner extends Node {
             }
 
         }
+        System.out.println("middle of  validate block");
+        System.out.println("is transactions valid  : " + valid);
         //System.out.println("Valid  ? : "+valid);
         if(valid){
             PeerToPeer conn = new PeerToPeer();
@@ -240,8 +247,11 @@ public class Miner extends Node {
                 maxLength = maxLength - 1;
             }
 
+            System.out.println("end of if valid");
+            System.out.println("Pneding block size : " + pendingBlocks.size());
         }
 
+        System.out.println("end of validate block");
         System.out.println("PENDING BLOCKS");
         for(int i = 0; i < pendingBlocks.size() ; i++){
             for(int j = 0 ; j < pendingBlocks.get(i).size() ; j++){

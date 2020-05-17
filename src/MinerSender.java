@@ -45,6 +45,7 @@ public class MinerSender extends Thread{
                 m.lock.lock();
 
                 if(m.branchChanged){
+                    System.out.println("is branch changed :"+ m.branches_transactions);
                     m.pending_transactions.clear();
                     m.all_valid_transactions.clear();
                     m.all_invalid_prevtransactions.clear();
@@ -113,6 +114,8 @@ public class MinerSender extends Thread{
                             temp.add(m.pending_transactions.get(key));
                         }
                         Block bb = m.buildBlock(temp);
+                        System.out.println("AFTER BUILD BLOCK : " + bb);
+                        System.out.println("IS NEW BLOCK ARRIVED: " + m.newBlockArrived);
                         if(m.newBlockArrived && bb == null){
                          System.out.println(" ANA D5LT fl condition l 8lat");
                             m.newBlockArrived = false;
@@ -131,10 +134,10 @@ public class MinerSender extends Thread{
                                 PeerToPeer conn = new PeerToPeer();
                                 conn.broadcastBlock(bb,m.nodeNumber);
                                 System.out.println(" olt 7b3at " + bb);
-                                //System.out.println(" pending size "+m.pending_transactions.size());
-                                //System.out.println("all valid size " + m.all_valid_transactions.size());
-                                //System.out.println("all invalid size " + m.all_invalid_prevtransactions.size());
-                                //System.out.println("Nonce " + bb.getNonce());
+                                System.out.println(" pending size "+m.pending_transactions.size());
+                                System.out.println("all valid size " + m.all_valid_transactions.size());
+                                System.out.println("all invalid size " + m.all_invalid_prevtransactions.size());
+                                System.out.println("Nonce " + bb.getNonce());
 
                             }
                         }
