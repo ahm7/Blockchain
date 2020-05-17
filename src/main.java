@@ -14,10 +14,23 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import java.sql.Timestamp;
+import java.util.spi.AbstractResourceBundleProvider;
 
 public class main {
 
      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException {
+
+
+        ArrayList<JSONObject> transactions=  constructTransactions();
+        System.out.println(transactions.size());
+
+
+        for(int j=0; j<transactions.size();j++){
+
+            System.out.println(transactions.get(j));
+        }
+
+
          Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
          int nodeNumber = Integer.parseInt(args[0]);
@@ -30,7 +43,42 @@ public class main {
          }else{
              n = new Node(port);
          }
-         /*
+         ///
+
+         ArrayList<Block> blocks  = new ArrayList<Block>();
+         int k =0;
+         String blockHashValue1 = "";
+         for(int i=0;i<6;i++){
+
+             ArrayList<JSONObject> transaction = new ArrayList<JSONObject>();
+             transaction.add(transactions.get(k));
+             k++;
+             transaction.add(transactions.get(k));
+             k++;
+             Block b0 = new Block();
+             Timestamp time = new Timestamp(System.currentTimeMillis());
+             b0.setNonce(20);
+             b0.setTransactions(transaction);
+             b0.generateBlockHash();
+             b0.setTimestamp(time);
+             b0.setPreviousBlockHash(blockHashValue1);
+
+             blockHashValue1 += b0.getPreviousBlockHash();
+             blockHashValue1 += b0.getMerkleTreeRoot();
+             blockHashValue1 += b0.getTimestamp();
+             blockHashValue1 += b0.getNonce();
+
+             blocks.add(b0);
+         }
+         n.addToBlockchain(true,blocks.get(0));
+         n.addToBlockchain(true,blocks.get(1));
+         n.addToBlockchain(true,blocks.get(2));
+         n.validateBlock(blocks.get(3));
+         n.validateBlock(blocks.get(4));
+         n.validateBlock(blocks.get(5));
+
+
+         ///
          if(port == 4000){
              Block b = new Block();
              b.setMerkleTreeRoot("dummy");
@@ -39,7 +87,6 @@ public class main {
             conn.broadcastBlock(b,nodeNumber);
          }
 
-          */
 
 
 
@@ -418,9 +465,25 @@ public class main {
         String hash_temp = hasher.generateHash("temp");
         map_txNum_to_hash.put(-1,hash_temp);
         // initialize 50 nodes
-        Node[] nodes = new Node[50];
-        for(int i=0;i<nodes.length;i++){
-            nodes[i] = new Node(1);
+
+        PrivateKey [] privateKeys = new PrivateKey[50];
+        PublicKey [] publicKeys = new PublicKey[50];
+        for(int i=0;i<50;i++) {
+            try {
+
+                KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+                KeyPair keyPair = keyGen.generateKeyPair();
+                PublicKey publicKey = keyPair.getPublic();
+                PrivateKey privateKey = keyPair.getPrivate();
+                privateKeys[i] = privateKey ;
+                publicKeys[i]  = publicKey ;
+
+                // attach a file to FileWriter
+            } catch (Exception e) {
+
+                throw new RuntimeException(e);
+
+            }
         }
 
         ArrayList<JSONObject> transactions_objects = new ArrayList<JSONObject>();
@@ -429,8 +492,8 @@ public class main {
             ArrayList<OutputsFromText>  outputs_parse = transaction_parse.get(i).getOutputs();
             InputsFromText input_parse    =  transaction_parse.get(i).getInputs();
 
-            PublicKey publicKey = nodes[input_parse.getInput()].getPublicKey();
-            PrivateKey privateKey = nodes[input_parse.getInput()].getPrivateKey();
+            PublicKey publicKey = publicKeys[input_parse.getInput()];
+            PrivateKey privateKey = privateKeys[input_parse.getInput()];
 
             transaction transaction = new transaction();
 
@@ -449,7 +512,7 @@ public class main {
                 output  output = new output();
                 output.setIndex(j);
                 output.setValue(outputs_parse.get(j).getValue());
-                output.setPublicKey(nodes[outputs_parse.get(j).getOutput()].getPublicKey());
+                output.setPublicKey(publicKeys[outputs_parse.get(j).getOutput()]);
                 outputs.add(output);
 
             }
@@ -457,7 +520,7 @@ public class main {
             transaction.setOutputs(outputs);
 
             transaction.setHash();
-            transaction.setSignature(nodes[input_parse.getInput()].getPrivateKey());
+            transaction.setSignature(privateKeys[input_parse.getInput()]);
 
             //System.out.println(transaction.getTransactionObject().get("hash"));
             map_txNum_to_hash.put(i+1,transaction.getTransactionObject().get("hash").toString());
