@@ -31,19 +31,23 @@ public class Node {
     int maxLength = 0;
     int maxIndex = 0;
     public ArrayList<ArrayList<Block>> pendingBlocks = new ArrayList<ArrayList<Block>>();
-    Server s = null;
-    Lock lock = new ReentrantLock();
 
+    Lock lock = new ReentrantLock();
+    int portNum = -1;
 
     public Node(int portNum,int nodeNumber){
         generateKeyPair();
         this.nodeNumber = nodeNumber;
         //this.UTXO_list = new HashMap<String,JSONObject>();
         this.publicKeys = new ArrayList<>();
-        s = new Server(portNum,this);
+        this.portNum = portNum;
+
+
+    }
+    public void initializeServer(){
+        Server s = new Server(portNum,this);
         Thread thread = new Thread(s);
         thread.start();
-
     }
 
     public PrivateKey getPrivateKey() {
@@ -87,11 +91,11 @@ public class Node {
                 }
             }
         }
-        System.out.println("node number : "+nodeNumber);
-        System.out.println("Valid  ? : "+valid);
-        System.out.println("size of blockchain "+ blockChain.size());
-        System.out.println("prev hash " + b.getPreviousBlockHash());
-        System.out.println("nonce " + b.getNonce());
+        //System.out.println("node number : "+nodeNumber);
+        //System.out.println("Valid  ? : "+valid);
+        //System.out.println("size of blockchain "+ blockChain.size());
+        //System.out.println("prev hash " + b.getPreviousBlockHash());
+        //System.out.println("nonce " + b.getNonce());
         if(valid){
             PeerToPeer conn = new PeerToPeer();
             conn.broadcastBlock(b,nodeNumber);
@@ -166,14 +170,15 @@ public class Node {
             }
 
         }
+        System.out.println("PENDING BLOCKS");
         for(int i = 0; i < pendingBlocks.size() ; i++){
             for(int j = 0 ; j < pendingBlocks.get(i).size() ; j++){
                 System.out.print(pendingBlocks.get(i).get(j).getNonce() + " ");
             }
             System.out.println("");
         }
-        System.out.println(maxLength);
-        System.out.println(maxIndex);
+        System.out.println("MAX LENGTH : " + maxLength);
+        System.out.println("MAX INDEX : " + maxIndex);
 
     }
 
@@ -234,8 +239,8 @@ public class Node {
             output_indexes.put((""+(i+1)),1); // if 1 that mean this output index unspend else 0
         }
         transaction.put("used_outputs",output_indexes);
-        System.out.println(hash);
-        System.out.println(transaction);
+        //System.out.println(hash);
+        //System.out.println(transaction);
         JSONObject t = new JSONObject();
         UTXO_list.put(hash,transaction);
     }
@@ -245,12 +250,12 @@ public class Node {
 
 
        boolean IS_UTXO = isUnSpend(transaction);
-       System.out.println("IS UTXO : " + IS_UTXO );
+       //System.out.println("IS UTXO : " + IS_UTXO );
 
        boolean singnatur_is_right = false ;
         if(IS_UTXO){
             singnatur_is_right = validateSignature(transaction);
-            System.out.println("singnatur_is_right : " + singnatur_is_right );
+            //System.out.println("singnatur_is_right : " + singnatur_is_right );
 
         }
        //boolean value_is_valid = validValue(transaction);
@@ -271,9 +276,9 @@ public class Node {
             JSONObject jsonLineItem = (JSONObject) o;
             String prevTxHash = jsonLineItem.get("prevTxHash").toString();
             int  outputIndex = (int)jsonLineItem.get("outputIndex");
-            System.out.println(" here a  a a " +prevTxHash);
+            //System.out.println(" here a  a a " +prevTxHash);
             if(UTXO_list.containsKey(prevTxHash)){
-                System.out.println("entered hereeeeee ");
+                //System.out.println("entered hereeeeee ");
                 JSONObject used_outputs = (JSONObject) UTXO_list.get(prevTxHash).get("used_outputs");
                 if((int)used_outputs.get(""+outputIndex)==0){
                     return false;

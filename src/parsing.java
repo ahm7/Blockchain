@@ -127,7 +127,7 @@ public class parsing {
         while (myReader.hasNextLine()) {
             String data = myReader.nextLine();
             if(printIndex != 0 && !data.equals("41226")){
-                System.out.println(data);
+                //System.out.println(data);
                 String[] parsedTransaction = parseString(data,"\\s+");
                 String[] parsedInput = parseString(parsedTransaction[1], ":");
                 int nodeNumber = Integer.parseInt(parsedInput[1]);

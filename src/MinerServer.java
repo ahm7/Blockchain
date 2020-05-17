@@ -5,12 +5,12 @@ import java.net.Socket;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class Server extends Thread{
+public class MinerServer extends Thread{
     int portNum = -1;
     ServerSocket ss = null;
-    Node n = null;
+    Miner n = null;
     public volatile Queue<Object> blocksRecieved = new LinkedList<>();
-    public Server(int portNum, Node n){
+    public MinerServer(int portNum, Miner n){
         this.portNum = portNum;
         this.n = n;
 
@@ -34,7 +34,7 @@ public class Server extends Thread{
                     String name = className.getName();
                     if(name.equals("Block")){
                         System.out.println("Received BLOCK !");
-                        NodeSender h = new NodeSender(1,b,n);
+                        MinerSender h = new MinerSender(1,b,n);
                         Thread thread = new Thread(h);
                         thread.start();
                     }else if(name.equals("Vote")){
@@ -43,6 +43,10 @@ public class Server extends Thread{
                     }else{
                         //System.out.println(b);
                         System.out.println("Received Transaction !");
+                        MinerSender h = new MinerSender(3,b,n);
+                        Thread thread = new Thread(h);
+                        thread.start();
+
                     }
                 }
                 //System.out.println(b.getMerkleTreeRoot());

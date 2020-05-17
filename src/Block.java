@@ -20,7 +20,7 @@ public class Block implements Serializable{
     }
 
     public void setTransactions(ArrayList<JSONObject> transactions) {
-        System.out.println(transactions.size());
+        //System.out.println(transactions.size());
         this.transactions = transactions;
     }
 
@@ -59,10 +59,10 @@ public class Block implements Serializable{
     public void generateBlockHash() {
         if(!checkLength()) return;
         int transactionsLength = transactions.size();
-        System.out.println(transactionsLength);
+        //System.out.println(transactionsLength);
         int depth = (int)Math.ceil(log2(transactionsLength));
         ArrayList<String> currArray = transactionsHashes();
-        System.out.println(currArray.size() +" " +"testSize");
+        //System.out.println(currArray.size() +" " +"testSize");
         ArrayList<String> nextArray = new ArrayList<String>();
         SHA256 hasher = new SHA256();
         if(transactionsLength%2 == 1) {
@@ -97,7 +97,7 @@ public class Block implements Serializable{
         ArrayList<String> result = new ArrayList<String>();
 
         for(int i = 0; i < transactions.size(); i++) {
-            System.out.println("hash" + " "+transactions.get(i).get("hash"));
+            //System.out.println("hash" + " "+transactions.get(i).get("hash"));
             result.add(transactions.get(i).get("hash").toString());
         }
         return result;

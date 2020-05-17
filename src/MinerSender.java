@@ -28,12 +28,14 @@ public class MinerSender extends Thread{
     {
         try{
             if(methodType == 1){
+                //m.lock.lock();
                 m.validateBlock((Block) b);
                 int temp_branch_num = m.choosed_branch;
                 int temp2 = m.chooseBlockToMineOnTopOfIt();
                 if(temp_branch_num != temp2){
                     m.branchChanged = true;
                 }
+                //m.lock.unlock();
 
 
             }else if(methodType == 2){
@@ -57,6 +59,7 @@ public class MinerSender extends Thread{
 
                 }
                 JSONObject tx = (JSONObject) b;
+                System.out.println("BLOCK CHAIN SIZE : " + m.blockChain.size());
                 boolean valid_trans = m.validateTransaction(tx);
                 valid_trans = true;
                 if(valid_trans){
@@ -76,7 +79,7 @@ public class MinerSender extends Thread{
                             double_spend = true;
 
                         }
-
+                        //System.out.println("Exists in INVALID TRANSACTIONS !!!!!!!!!");
 
 
                     }
@@ -86,7 +89,7 @@ public class MinerSender extends Thread{
                     }
 
                     if(!double_spend){
-                        System.out.println("m.branches_transactions.size() : " + m.branches_transactions.size() );
+                        //System.out.println("m.branches_transactions.size() : " + m.branches_transactions.size() );
                         if(m.branches_transactions.size() > 0 && m.branches_transactions.get(m.choosed_branch).containsKey(hash)){
 
 
@@ -95,12 +98,13 @@ public class MinerSender extends Thread{
                         }
                         m.all_valid_transactions.put(hash,tx);
                         m.all_invalid_prevtransactions.put(prev_tx_hash+string_outputIndex,outputIndex);
-                        System.out.println("Hash " + hash);
-                        System.out.println("prev tx + "  + prev_tx_hash + string_outputIndex);
+                        //System.out.println("Hash " + hash);
+                        //System.out.println("prev tx + "  + prev_tx_hash + string_outputIndex);
                     }
                     //pending_transactions.add(tx);
                     if(m.pending_transactions.size() == m.blockSize){
-                        System.out.println(tx);
+                        //System.out.println(tx);
+                        System.out.println("Ana 3mlt block w 7b3to 5ly balek ");
 
                         ArrayList<JSONObject> temp = new ArrayList<JSONObject>();
 
@@ -110,10 +114,14 @@ public class MinerSender extends Thread{
                         }
                         Block bb = m.buildBlock(temp);
                         if(m.newBlockArrived && bb == null){
-
+                         System.out.println(" ANA D5LT fl condition l 8lat");
+                            m.newBlockArrived = false;
                         }else {
                             if(m.pendingBlocks.size()>0){
                                 m.pendingBlocks.get(m.maxIndex).add(bb);
+                                PeerToPeer conn = new PeerToPeer();
+                                conn.broadcastBlock(bb,m.nodeNumber);
+                                System.out.println("7b3aaaaat " + bb);
 
                             }else {
 
@@ -122,10 +130,11 @@ public class MinerSender extends Thread{
                                 m.pendingBlocks.add(temp4);
                                 PeerToPeer conn = new PeerToPeer();
                                 conn.broadcastBlock(bb,m.nodeNumber);
-                                System.out.println(" pending size "+m.pending_transactions.size());
-                                System.out.println("all valid size " + m.all_valid_transactions.size());
-                                System.out.println("all invalid size " + m.all_invalid_prevtransactions.size());
-                                System.out.println("Nonce " + bb.getNonce());
+                                System.out.println(" olt 7b3at " + bb);
+                                //System.out.println(" pending size "+m.pending_transactions.size());
+                                //System.out.println("all valid size " + m.all_valid_transactions.size());
+                                //System.out.println("all invalid size " + m.all_invalid_prevtransactions.size());
+                                //System.out.println("Nonce " + bb.getNonce());
 
                             }
                         }
@@ -141,11 +150,11 @@ public class MinerSender extends Thread{
 
                     }
                 } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+
         } catch (SignatureException e) {
-            e.printStackTrace();
+
         } catch (InvalidKeyException | IOException e) {
-            e.printStackTrace();
+
         }
 
     }

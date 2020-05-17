@@ -28,9 +28,9 @@ import java.util.spi.AbstractResourceBundleProvider;
 public class main {
 
      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException, InvalidKeySpecException, URISyntaxException, NoSuchProviderException {
+/*
 
-
-         /*for (int i=0;i<50;i++){
+         for (int i=0;i<50;i++){
          KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
          KeyPair keyPair = keyGen.generateKeyPair();
          PublicKey publicKey = keyPair.getPublic();
@@ -41,7 +41,8 @@ public class main {
          outputStream = new FileOutputStream("testFiles/keys"+i+"p"+".txt");
              outputStream.write(privateKey.getEncoded());
          System.out.println(privateKey);
-         }*/
+         }
+
          for(int i=0;i<50;i++){
 
              InputStream inputStream = new FileInputStream("testFiles/keys"+i+"c"+".txt");
@@ -67,33 +68,12 @@ public class main {
          }
 
 
+ */
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-         /*ArrayList<JSONObject> transactions=  constructTransactions();
-        System.out.println(transactions.size());
-
-
-        for(int j=0; j<transactions.size();j++){
-
-            System.out.println(transactions.get(j));
-        }
+        ArrayList<JSONObject> transactions=  constructTransactions();
+        //System.out.println(transactions.size());
 
 
          Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -101,12 +81,18 @@ public class main {
          parsing p = new parsing();
          NodePeers node = p.readPort(nodeNumber);
          int port = node.getPort();
+
+         //Miner n = new Miner(port,nodeNumber);
+
          Node n;
          if(port == 4001){
-             n = new Miner(port);
+             n = new Miner(port,nodeNumber);
          }else{
-             n = new Node(port);
+             n = new Node(port,nodeNumber);
          }
+         n.initializeServer();
+
+
          ///
 
          ArrayList<Block> blocks  = new ArrayList<Block>();
@@ -126,21 +112,35 @@ public class main {
              b0.generateBlockHash();
              b0.setTimestamp(time);
              b0.setPreviousBlockHash(blockHashValue1);
-
+             blockHashValue1 = "";
              blockHashValue1 += b0.getPreviousBlockHash();
              blockHashValue1 += b0.getMerkleTreeRoot();
              blockHashValue1 += b0.getTimestamp();
              blockHashValue1 += b0.getNonce();
+             SHA256 hash = new SHA256();
+             blockHashValue1 = hash.generateHash(blockHashValue1);
 
              blocks.add(b0);
          }
+
          n.addToBlockchain(true,blocks.get(0));
          n.addToBlockchain(true,blocks.get(1));
          n.addToBlockchain(true,blocks.get(2));
-         n.validateBlock(blocks.get(3));
-         n.validateBlock(blocks.get(4));
-         n.validateBlock(blocks.get(5));
+         if(port == 4000){
+             n.validateBlock(blocks.get(3));
+             n.validateBlock(blocks.get(4));
+             n.validateBlock(blocks.get(5));
+         }
 
+
+         if(port == 4000){
+              PeerToPeer conn = new PeerToPeer();
+
+              conn.broadcastTx(transactions.get(13),nodeNumber);
+              conn.broadcastTx(transactions.get(14),nodeNumber);
+         }
+
+/*
 
          ///
          if(port == 4000){
@@ -224,9 +224,9 @@ public class main {
              conn.broadcastTx(trans2,nodeNumber);
              conn.broadcastTx(trans3,nodeNumber);
          }
-         n.recBlocks();
+         //n.recBlocks();
 
-          */
+  */
          /*
          Block b = new Block();
          Class className = b.getClass();
@@ -440,7 +440,7 @@ public class main {
          n.validateBlock(b10);
          n.validateBlock(b11);
          */
-        testSortFile();
+        //testSortFile();
     }
     public static void testConnection() throws IOException {
         PeerToPeer conn = new PeerToPeer();
@@ -473,7 +473,7 @@ public class main {
     }
 
     public static void testCreateTransaction() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, FileNotFoundException {
-        Node node = new Node(1);
+        Node node = new Node(1,2);
         PublicKey publicKey = node.getPublicKey();
         PrivateKey privateKey = node.getPrivateKey();
 
@@ -524,7 +524,7 @@ public class main {
          SHA256 hasher = new SHA256();
         parsing parse = new parsing();
         ArrayList<TransactionFromText> transaction_parse = parse.readDataset();
-        System.out.println("traparse"+" "+ transaction_parse.size());
+        //System.out.println("traparse"+" "+ transaction_parse.size());
 
 
         Map<Integer,String> map_txNum_to_hash = new HashMap<Integer,String>();
@@ -608,21 +608,21 @@ public class main {
     public static void testDatasetParser(){
          parsing parse = new parsing();
          ArrayList<TransactionFromText> transactions = parse.readDataset();
-         System.out.println("done");
+         //System.out.println("done");
     }
 
     public static  void testTransactionsWithBlock() throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException {
 
         ArrayList<JSONObject> transactions_objects = constructTransactions();
-        System.out.println("trasize"+" "+ transactions_objects.size());
+        //System.out.println("trasize"+" "+ transactions_objects.size());
         JSONArray a = new JSONArray();
         for(int k=0;k<transactions_objects.size();k++){
             a.add(transactions_objects.get(k));
         }
-        System.out.println(transactions_objects.size());
+        //System.out.println(transactions_objects.size());
 
 
-        Node n = new Node(1);
+        Node n = new Node(1,2);
         Timestamp time = new Timestamp(System.currentTimeMillis());
 
         Block b0 = new Block();
@@ -813,19 +813,19 @@ public class main {
         n.addToBlockchain(true,b0);
         n.addToBlockchain(true,b1);
         n.addToBlockchain(true,b2);
-        System.out.println("b7");
+        //System.out.println("b7");
         n.validateBlock(b3);
-        System.out.println("b3");
+        //System.out.println("b3");
         n.validateBlock(b4);
-        System.out.println("b4");
+        //System.out.println("b4");
         n.validateBlock(b5);
-        System.out.println("b8");
+        //System.out.println("b8");
         n.validateBlock(b7);
-        System.out.println("b5");
+        //System.out.println("b5");
         n.validateBlock(b8);
-        System.out.println("b9");
+        //System.out.println("b9");
         n.validateBlock(b9);
-        System.out.println("b10");
+        //System.out.println("b10");
         //n.validateBlock(b10);
         //System.out.println("b");
 

@@ -4,6 +4,7 @@ import org.json.simple.JSONObject;
 
 import javax.swing.*;
 import java.awt.image.ByteLookupTable;
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
@@ -25,7 +26,16 @@ public class Miner extends Node {
     boolean branchChanged = false;
     boolean newBlockArrived = false;
     public Miner(int portNum,int nodeNumber) {
+
         super(portNum,nodeNumber);
+
+
+    }
+
+    public void initializeServer(){
+        MinerServer s = new MinerServer(portNum,this);
+        Thread thread = new Thread(s);
+        thread.start();
     }
     // Miner
     // construct block
@@ -106,14 +116,15 @@ public class Miner extends Node {
     }
 
 
-    public void validateBlock(Block b)  throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public void validateBlock(Block b) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
         ArrayList<JSONObject> blockTransaction = b.getTransactions();
         String blockHashValuee = "";
         blockHashValuee += b.getPreviousBlockHash();
         blockHashValuee += b.getMerkleTreeRoot();
         blockHashValuee += b.getTimestamp();
         blockHashValuee += b.getNonce();
-        boolean valid = checkNonce(blockHashValuee);
+        //boolean valid = checkNonce(blockHashValuee);
+        boolean valid = true;
         if(valid){
             for(int i = 0 ; i < blockTransaction.size() ; i++){
                 valid = validateTransaction(blockTransaction.get(i));
@@ -123,11 +134,10 @@ public class Miner extends Node {
             }
 
         }
-        System.out.println("Valid  ? : "+valid);
+        //System.out.println("Valid  ? : "+valid);
         if(valid){
-            MinerSender h = new MinerSender(1,b,this);
-            Thread thread = new Thread(h);
-            thread.start();
+            PeerToPeer conn = new PeerToPeer();
+            conn.broadcastBlock(b,nodeNumber);
             if(pendingBlocks.size() == 0){
                 ArrayList<Block> temp = new ArrayList<Block>();
                 Map<String,JSONObject>  temp1= new HashMap<String,JSONObject>();
@@ -231,14 +241,16 @@ public class Miner extends Node {
             }
 
         }
+
+        System.out.println("PENDING BLOCKS");
         for(int i = 0; i < pendingBlocks.size() ; i++){
             for(int j = 0 ; j < pendingBlocks.get(i).size() ; j++){
                 System.out.print(pendingBlocks.get(i).get(j).getNonce() + " ");
             }
             System.out.println("");
         }
-        System.out.println(maxLength);
-        System.out.println(maxIndex);
+        System.out.println("MAX LENGTH : " + maxLength);
+        System.out.println("MAX INDEX : " + maxIndex);
 
     }
 
