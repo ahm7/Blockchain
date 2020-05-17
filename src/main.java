@@ -21,7 +21,7 @@ public class main {
      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException {
 
 
-        ArrayList<JSONObject> transactions=  constructTransactions();
+        ArrayList<JSONObject> transactions =  constructTransactions();
         System.out.println(transactions.size());
 
 
@@ -37,47 +37,71 @@ public class main {
          parsing p = new parsing();
          NodePeers node = p.readPort(nodeNumber);
          int port = node.getPort();
-         Node n;
+         Node n = new Node(port,nodeNumber);
+         //n.recBlocks();
+         /*
          if(port == 4001){
              n = new Miner(port);
          }else{
              n = new Node(port);
          }
+         */
+
          ///
 
          ArrayList<Block> blocks  = new ArrayList<Block>();
          int k =0;
+         Timestamp time = new Timestamp(50);
          String blockHashValue1 = "";
          for(int i=0;i<6;i++){
-
              ArrayList<JSONObject> transaction = new ArrayList<JSONObject>();
              transaction.add(transactions.get(k));
              k++;
              transaction.add(transactions.get(k));
              k++;
              Block b0 = new Block();
-             Timestamp time = new Timestamp(System.currentTimeMillis());
-             b0.setNonce(20);
+             b0.setNonce(i);
              b0.setTransactions(transaction);
-             b0.generateBlockHash();
+             b0.setMerkleTreeRoot("Ana Merkle Tree");
              b0.setTimestamp(time);
              b0.setPreviousBlockHash(blockHashValue1);
 
+             blockHashValue1 = "";
              blockHashValue1 += b0.getPreviousBlockHash();
+             System.out.println( " b0.getPreviousBlockHash() : " +b0.getPreviousBlockHash());
              blockHashValue1 += b0.getMerkleTreeRoot();
+             System.out.println( " b0.getMerkleTreeRoot(): " +b0.getMerkleTreeRoot());
              blockHashValue1 += b0.getTimestamp();
+             System.out.println( " b0.getTimestamp() : " +b0.getTimestamp());
              blockHashValue1 += b0.getNonce();
+             System.out.println( " b0.getNonce() : " +b0.getNonce());
+
+             SHA256 hash = new SHA256();
+             blockHashValue1 = hash.generateHash(blockHashValue1);
+
+             System.out.println( " BLOCK HASH VALUE : " + blockHashValue1 );
+             System.out.println(" BLOCK PREVIOUS HASH VALUE : " + b0.getPreviousBlockHash());
+
 
              blocks.add(b0);
          }
+
          n.addToBlockchain(true,blocks.get(0));
          n.addToBlockchain(true,blocks.get(1));
          n.addToBlockchain(true,blocks.get(2));
-         n.validateBlock(blocks.get(3));
-         n.validateBlock(blocks.get(4));
-         n.validateBlock(blocks.get(5));
+         if(port == 4000){
+             PeerToPeer conn = new PeerToPeer();
+             n.validateBlock(blocks.get(3));
+             //conn.broadcastBlock(blocks.get(3),1);
+             //n.validateBlock(blocks.get(4));
+             //conn.broadcastBlock(blocks.get(4),1);
+             //n.validateBlock(blocks.get(5));
+             //conn.broadcastBlock(blocks.get(5),1);
+
+         }
 
 
+/*
          ///
          if(port == 4000){
              Block b = new Block();
@@ -161,6 +185,7 @@ public class main {
              conn.broadcastTx(trans3,nodeNumber);
          }
          n.recBlocks();
+
          /*
          Block b = new Block();
          Class className = b.getClass();
@@ -374,7 +399,7 @@ public class main {
          n.validateBlock(b10);
          n.validateBlock(b11);
          */
-        testSortFile();
+        //testSortFile();
     }
     public static void testConnection() throws IOException {
         PeerToPeer conn = new PeerToPeer();
@@ -407,7 +432,7 @@ public class main {
     }
 
     public static void testCreateTransaction() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, FileNotFoundException {
-        Node node = new Node(1);
+        Node node = new Node(1,2);
         PublicKey publicKey = node.getPublicKey();
         PrivateKey privateKey = node.getPrivateKey();
 
@@ -552,7 +577,7 @@ public class main {
         System.out.println(transactions_objects.size());
 
 
-        Node n = new Node(1);
+        Node n = new Node(1,2);
         Timestamp time = new Timestamp(System.currentTimeMillis());
 
         Block b0 = new Block();

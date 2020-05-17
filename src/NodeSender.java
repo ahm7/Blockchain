@@ -20,6 +20,7 @@ public class NodeSender extends Thread{
         try{
             if(methodType == 1){
                 n.validateBlock((Block) b);
+
             }else if(methodType == 2){
 
 

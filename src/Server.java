@@ -8,9 +8,12 @@ import java.util.Queue;
 public class Server extends Thread{
     int portNum = -1;
     ServerSocket ss = null;
+    Node n = null;
     public volatile Queue<Object> blocksRecieved = new LinkedList<>();
-    public Server(int portNum){
+    public Server(int portNum, Node n){
         this.portNum = portNum;
+        this.n = n;
+
     }
     public void run()
     {
@@ -25,6 +28,20 @@ public class Server extends Thread{
                 blocksRecieved.add(b);
                 //System.out.println(blocksRecieved.size());
                 System.out.println("Received Object !");
+
+                if(b != null){
+                    Class className = b.getClass();
+                    String name = className.getName();
+                    if(name.equals("Block")){
+                        NodeSender h = new NodeSender(1,b,n);
+                        Thread thread = new Thread(h);
+                        thread.start();
+                    }else if(name.equals("Vote")){
+
+                    }else{
+                        System.out.println(b);
+                    }
+                }
                 //System.out.println(b.getMerkleTreeRoot());
                 socket.close();
             }

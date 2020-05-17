@@ -16,6 +16,7 @@ public class MinerSender extends Thread{
 
 
 
+
     public MinerSender(int methodType, Object b, Miner m){
         this.methodType = methodType;
         this.b = b;
@@ -33,6 +34,8 @@ public class MinerSender extends Thread{
                 if(temp_branch_num != temp2){
                     m.branchChanged = true;
                 }
+
+
             }else if(methodType == 2){
 
 
@@ -117,19 +120,20 @@ public class MinerSender extends Thread{
                                 ArrayList<Block> temp4 = new ArrayList<Block>();
                                 temp4.add(bb);
                                 m.pendingBlocks.add(temp4);
+                                PeerToPeer conn = new PeerToPeer();
+                                conn.broadcastBlock(bb,m.nodeNumber);
+                                System.out.println(" pending size "+m.pending_transactions.size());
+                                System.out.println("all valid size " + m.all_valid_transactions.size());
+                                System.out.println("all invalid size " + m.all_invalid_prevtransactions.size());
+                                System.out.println("Nonce " + bb.getNonce());
 
                             }
                         }
                         //m.validateBlock(bb);
-                        /*
-                        PeerToPeer conn = new PeerToPeer();
-                        conn.broadcastBlock(bb,2);
-                        System.out.println(" pending size "+m.pending_transactions.size());
-                        System.out.println("all valid size " + m.all_valid_transactions.size());
-                        System.out.println("all invalid size " + m.all_invalid_prevtransactions.size());
-                        System.out.println("Nonce " + bb.getNonce());
 
-                         */
+
+
+
                         m.pending_transactions.clear();
                     }
                 }
@@ -140,7 +144,7 @@ public class MinerSender extends Thread{
             e.printStackTrace();
         } catch (SignatureException e) {
             e.printStackTrace();
-        } catch (InvalidKeyException e) {
+        } catch (InvalidKeyException | IOException e) {
             e.printStackTrace();
         }
 

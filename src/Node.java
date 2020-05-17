@@ -25,6 +25,8 @@ public class Node {
     public Map<String,JSONObject> temp_UTXO_list = new HashMap<String,JSONObject>();
     ArrayList<PublicKey> publicKeys;
     public ArrayList<Block> blockChain = new ArrayList<Block>();
+    private int difficulty = 2;
+    int nodeNumber = -1;
 
     int maxLength = 0;
     int maxIndex = 0;
@@ -33,11 +35,12 @@ public class Node {
     Lock lock = new ReentrantLock();
 
 
-    public Node(int portNum){
+    public Node(int portNum,int nodeNumber){
         generateKeyPair();
+        this.nodeNumber = nodeNumber;
         //this.UTXO_list = new HashMap<String,JSONObject>();
         this.publicKeys = new ArrayList<>();
-        s = new Server(portNum);
+        s = new Server(portNum,this);
         Thread thread = new Thread(s);
         thread.start();
 
@@ -51,38 +54,47 @@ public class Node {
         return publicKey;
     }
 
-    public void recBlocks() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
-        while(true){
-           Object b = s.getBlock();
-           if(b != null){
-               Class className = b.getClass();
-               String name = className.getName();
-               if(name.equals("Block")){
-                   NodeSender h = new NodeSender(1,b,this);
-                   Thread thread = new Thread(h);
-                   thread.start();
+    public boolean checkNonce(String concat){
+        boolean check = true;
+        SHA256 hash = new SHA256();
+        String hashedHeader = hash.generateHash(concat);
+        int index = 0;
+        while (index < difficulty) {
 
-               }else if(name.equals("Vote")){
-
-               }else{
-                   System.out.println(b);
-               }
-           }
+            if (hashedHeader.charAt(index) != '0') {
+                check = false;
+                break;
+            }
+            index++;
         }
+        return check;
     }
 
 
-    public void validateBlock(Block b)  throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public void validateBlock(Block b) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
         ArrayList<JSONObject> blockTransaction = b.getTransactions();
+        String blockHashValuee = "";
+        blockHashValuee += b.getPreviousBlockHash();
+        blockHashValuee += b.getMerkleTreeRoot();
+        blockHashValuee += b.getTimestamp();
+        blockHashValuee += b.getNonce();
         boolean valid = true;
-       for(int i = 0 ; i < blockTransaction.size() ; i++){
-            valid = validateTransaction(blockTransaction.get(i));
-            if(!valid){
-                break;
+        if(valid){
+            for(int i = 0 ; i < blockTransaction.size() ; i++){
+                valid = validateTransaction(blockTransaction.get(i));
+                if(!valid){
+                    break;
+                }
             }
         }
-       System.out.println(valid);
+        System.out.println("node number : "+nodeNumber);
+        System.out.println("Valid  ? : "+valid);
+        System.out.println("size of blockchain "+ blockChain.size());
+        System.out.println("prev hash " + b.getPreviousBlockHash());
+        System.out.println("nonce " + b.getNonce());
         if(valid){
+            PeerToPeer conn = new PeerToPeer();
+            conn.broadcastBlock(b,nodeNumber);
             if(pendingBlocks.size() == 0){
                 ArrayList<Block> temp = new ArrayList<Block>();
                 temp.add(b);
@@ -233,10 +245,13 @@ public class Node {
 
 
        boolean IS_UTXO = isUnSpend(transaction);
+       System.out.println("IS UTXO : " + IS_UTXO );
 
        boolean singnatur_is_right = false ;
         if(IS_UTXO){
             singnatur_is_right = validateSignature(transaction);
+            System.out.println("singnatur_is_right : " + singnatur_is_right );
+
         }
        //boolean value_is_valid = validValue(transaction);
 
@@ -256,8 +271,9 @@ public class Node {
             JSONObject jsonLineItem = (JSONObject) o;
             String prevTxHash = jsonLineItem.get("prevTxHash").toString();
             int  outputIndex = (int)jsonLineItem.get("outputIndex");
-
+            System.out.println(" here a  a a " +prevTxHash);
             if(UTXO_list.containsKey(prevTxHash)){
+                System.out.println("entered hereeeeee ");
                 JSONObject used_outputs = (JSONObject) UTXO_list.get(prevTxHash).get("used_outputs");
                 if((int)used_outputs.get(""+outputIndex)==0){
                     return false;

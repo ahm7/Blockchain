@@ -24,8 +24,8 @@ public class Miner extends Node {
     public int choosed_branch = 0;
     boolean branchChanged = false;
     boolean newBlockArrived = false;
-    public Miner(int portNum) {
-        super(portNum);
+    public Miner(int portNum,int nodeNumber) {
+        super(portNum,nodeNumber);
     }
     // Miner
     // construct block
@@ -41,30 +41,6 @@ public class Miner extends Node {
 
     }
 
-
-    public void recBlocks() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        while(true){
-            Object b = s.getBlock();
-            if(b != null){
-                Class className = b.getClass();
-                String name = className.getName();
-                if(name.equals("Block")){
-                    MinerSender h = new MinerSender(1,b,this);
-                    Thread thread = new Thread(h);
-                    thread.start();
-
-                }else if(name.equals("Vote")){
-
-
-                }else{
-                    MinerSender h = new MinerSender(3,b,this);
-                    Thread thread = new Thread(h);
-                    thread.start();
-
-                }
-            }
-        }
-    }
 
     public Block buildBlock(ArrayList<JSONObject> transactions ){
         Block b = new Block();
@@ -132,15 +108,26 @@ public class Miner extends Node {
 
     public void validateBlock(Block b)  throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         ArrayList<JSONObject> blockTransaction = b.getTransactions();
-        boolean valid = true;
-        for(int i = 0 ; i < blockTransaction.size() ; i++){
-            valid = validateTransaction(blockTransaction.get(i));
-            if(!valid){
-                break;
-            }
-        }
-        System.out.println(valid);
+        String blockHashValuee = "";
+        blockHashValuee += b.getPreviousBlockHash();
+        blockHashValuee += b.getMerkleTreeRoot();
+        blockHashValuee += b.getTimestamp();
+        blockHashValuee += b.getNonce();
+        boolean valid = checkNonce(blockHashValuee);
         if(valid){
+            for(int i = 0 ; i < blockTransaction.size() ; i++){
+                valid = validateTransaction(blockTransaction.get(i));
+                if(!valid){
+                    break;
+                }
+            }
+
+        }
+        System.out.println("Valid  ? : "+valid);
+        if(valid){
+            MinerSender h = new MinerSender(1,b,this);
+            Thread thread = new Thread(h);
+            thread.start();
             if(pendingBlocks.size() == 0){
                 ArrayList<Block> temp = new ArrayList<Block>();
                 Map<String,JSONObject>  temp1= new HashMap<String,JSONObject>();
