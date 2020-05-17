@@ -5,8 +5,17 @@ import java.awt.image.AreaAveragingScaleFilter;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.*;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.Timestamp;
@@ -18,10 +27,66 @@ import java.util.spi.AbstractResourceBundleProvider;
 
 public class main {
 
-     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException {
+     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException, InvalidKeySpecException, URISyntaxException, NoSuchProviderException {
 
 
-        ArrayList<JSONObject> transactions=  constructTransactions();
+         /*for (int i=0;i<50;i++){
+         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+         KeyPair keyPair = keyGen.generateKeyPair();
+         PublicKey publicKey = keyPair.getPublic();
+         PrivateKey privateKey = keyPair.getPrivate();
+         OutputStream outputStream = new FileOutputStream("testFiles/keys"+i+"c"+".txt");
+         outputStream.write(publicKey.getEncoded());
+         //System.out.println(publicKey);
+         outputStream = new FileOutputStream("testFiles/keys"+i+"p"+".txt");
+             outputStream.write(privateKey.getEncoded());
+         System.out.println(privateKey);
+         }*/
+         for(int i=0;i<50;i++){
+
+             InputStream inputStream = new FileInputStream("testFiles/keys"+i+"c"+".txt");
+             long fileSize = new File("testFiles/keys"+i+"c"+".txt").length();
+             byte[] allBytes = new byte[(int) fileSize];
+             inputStream.read(allBytes);
+             KeyFactory kf = KeyFactory.getInstance("RSA"); // or "EC" or whatever
+             PublicKey publicKey1 = kf.generatePublic(new X509EncodedKeySpec(allBytes));
+             //System.out.println(publicKey1);
+
+
+              inputStream = new FileInputStream("testFiles/keys"+i+"p"+".txt");
+              fileSize = new File("testFiles/keys"+i+"p"+".txt").length();
+             allBytes = new byte[(int) fileSize];
+             inputStream.read(allBytes);
+             KeyFactory kf1 = KeyFactory.getInstance("RSA"); // or "EC" or whatever
+             //PrivateKey privateKey = kf1.generatePrivate(new X509EncodedKeySpec(allBytes));
+             PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(allBytes);
+             //PrivateKey privateKey = kf1.generatePrivate(new X509EncodedKeySpec(spec.getEncoded()));
+             PrivateKey privateKey = kf1.generatePrivate(spec);
+             System.out.println(privateKey);
+
+         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+         /*ArrayList<JSONObject> transactions=  constructTransactions();
         System.out.println(transactions.size());
 
 
@@ -32,7 +97,6 @@ public class main {
 
 
          Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-
          int nodeNumber = Integer.parseInt(args[0]);
          parsing p = new parsing();
          NodePeers node = p.readPort(nodeNumber);
@@ -161,6 +225,8 @@ public class main {
              conn.broadcastTx(trans3,nodeNumber);
          }
          n.recBlocks();
+
+          */
          /*
          Block b = new Block();
          Class className = b.getClass();
@@ -454,7 +520,7 @@ public class main {
 
     }
 
-    public  static  ArrayList<JSONObject>  constructTransactions() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, IOException {
+    public  static  ArrayList<JSONObject>  constructTransactions() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, IOException, InvalidKeySpecException {
          SHA256 hasher = new SHA256();
         parsing parse = new parsing();
         ArrayList<TransactionFromText> transaction_parse = parse.readDataset();
@@ -468,23 +534,27 @@ public class main {
 
         PrivateKey [] privateKeys = new PrivateKey[50];
         PublicKey [] publicKeys = new PublicKey[50];
-        for(int i=0;i<50;i++) {
-            try {
 
-                KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-                KeyPair keyPair = keyGen.generateKeyPair();
-                PublicKey publicKey = keyPair.getPublic();
-                PrivateKey privateKey = keyPair.getPrivate();
-                privateKeys[i] = privateKey ;
-                publicKeys[i]  = publicKey ;
+        for(int i=0;i<50;i++){
 
-                // attach a file to FileWriter
-            } catch (Exception e) {
+            InputStream inputStream = new FileInputStream("testFiles/keys"+i+"c"+".txt");
+            long fileSize = new File("testFiles/keys"+i+"c"+".txt").length();
+            byte[] allBytes = new byte[(int) fileSize];
+            inputStream.read(allBytes);
+            KeyFactory kf = KeyFactory.getInstance("RSA"); // or "EC" or whatever
+            publicKeys[i] = kf.generatePublic(new X509EncodedKeySpec(allBytes));
 
-                throw new RuntimeException(e);
 
-            }
+            inputStream = new FileInputStream("testFiles/keys"+i+"p"+".txt");
+            fileSize = new File("testFiles/keys"+i+"p"+".txt").length();
+            allBytes = new byte[(int) fileSize];
+            inputStream.read(allBytes);
+            KeyFactory kf1 = KeyFactory.getInstance("RSA"); // or "EC" or whatever
+            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(allBytes);
+            privateKeys[i] = kf1.generatePrivate(spec);
+
         }
+
 
         ArrayList<JSONObject> transactions_objects = new ArrayList<JSONObject>();
         for(int i=0;i<transaction_parse.size();i++){
@@ -541,7 +611,7 @@ public class main {
          System.out.println("done");
     }
 
-    public static  void testTransactionsWithBlock() throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public static  void testTransactionsWithBlock() throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException {
 
         ArrayList<JSONObject> transactions_objects = constructTransactions();
         System.out.println("trasize"+" "+ transactions_objects.size());
