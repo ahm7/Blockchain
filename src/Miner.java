@@ -218,6 +218,7 @@ public class Miner extends Node {
                         if(pendingBlocks.get(i).size() > maxLength){
                             maxLength = pendingBlocks.get(i).size();
                             maxIndex = i;
+                            branchChanged = true ;
                         }
                         break;
                     }
