@@ -20,14 +20,14 @@ public class Node {
 
     private PrivateKey privateKey;
     private PublicKey publicKey;
-    private Map<String,JSONObject> UTXO_list = new HashMap<String,JSONObject>();
-    private Map<String,JSONObject> temp_UTXO_list = new HashMap<String,JSONObject>();
+    public Map<String,JSONObject> UTXO_list = new HashMap<String,JSONObject>();
+    public Map<String,JSONObject> temp_UTXO_list = new HashMap<String,JSONObject>();
     ArrayList<PublicKey> publicKeys;
     public ArrayList<Block> blockChain = new ArrayList<Block>();
 
     int maxLength = 0;
     int maxIndex = 0;
-    private ArrayList<ArrayList<Block>> pendingBlocks = new ArrayList<ArrayList<Block>>();
+    public ArrayList<ArrayList<Block>> pendingBlocks = new ArrayList<ArrayList<Block>>();
     Server s = null;
 
 
