@@ -2,10 +2,11 @@ public class POW {
 
     private Block block;
     private int difficulty;
-
-    public POW(Block b,int difficulty){
+    Miner m = null ;
+    public POW(Block b,int difficulty,Miner m){
      this.block = b;
      this.difficulty = difficulty;
+     this.m = m;
     }
 
     public boolean checkNonce(String concat){
@@ -14,6 +15,11 @@ public class POW {
         String hashedHeader = hash.generateHash(concat);
         int index = 0;
         while (index < difficulty) {
+
+            if(m.newBlockArrived){
+               return false;
+            }
+
             if (hashedHeader.charAt(index) != '0') {
                 check = false;
                 break;
@@ -32,6 +38,10 @@ public class POW {
             concat += block.getNonce();
             if(checkNonce(concat)){
                 break;
+            }
+
+            if(m.newBlockArrived){
+                return null;
             }
 
             int nonce = block.getNonce();

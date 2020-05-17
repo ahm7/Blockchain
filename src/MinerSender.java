@@ -29,7 +29,7 @@ public class MinerSender extends Thread{
             if(methodType == 1){
                 m.validateBlock((Block) b);
                 int temp_branch_num = m.choosed_branch;
-                int temp2 = m.choosed_branch;
+                int temp2 = m.chooseBlockToMineOnTopOfIt();
                 if(temp_branch_num != temp2){
                     m.branchChanged = true;
                 }
@@ -106,6 +106,20 @@ public class MinerSender extends Thread{
                             temp.add(m.pending_transactions.get(key));
                         }
                         Block bb = m.buildBlock(temp);
+                        if(m.newBlockArrived && bb == null){
+
+                        }else {
+                            if(m.pendingBlocks.size()>0){
+                                m.pendingBlocks.get(m.maxIndex).add(bb);
+
+                            }else {
+
+                                ArrayList<Block> temp4 = new ArrayList<Block>();
+                                temp4.add(bb);
+                                m.pendingBlocks.add(temp4);
+
+                            }
+                        }
                         //m.validateBlock(bb);
                         /*
                         PeerToPeer conn = new PeerToPeer();
