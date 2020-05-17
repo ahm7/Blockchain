@@ -22,6 +22,7 @@ public class Miner extends Node {
     ArrayList<Map<String,JSONObject>> branches_transactions = new ArrayList<Map<String,JSONObject>>();
     public  int blockSize = 2;
     public int choosed_branch = 0;
+    boolean branchChanged = false;
     public Miner(int portNum) {
         super(portNum);
     }
@@ -148,6 +149,7 @@ public class Miner extends Node {
                 branches_transactions.add(temp1);
                 temp.add(b);
                 pendingBlocks.add(temp);
+                chooseBlockToMineOnTopOfIt();
 
             }
             int size = pendingBlocks.size();
@@ -182,9 +184,11 @@ public class Miner extends Node {
                             maxIndex = pendingBlocks.size();
                         }
                         pendingBlocks.add(collisionList);
+                        chooseBlockToMineOnTopOfIt();
                         break;
                     }else if(blockHashValue.equals(b.getPreviousBlockHash()) && j == listSize - 1){
                         pendingBlocks.get(i).add(b);
+                        chooseBlockToMineOnTopOfIt();
 
                         for(int k=0; k<b.getTransactions().size();i++){
                             branches_transactions.get(i).put(b.getTransactions().get(i).get("hash").toString(),b.getTransactions().get(i));

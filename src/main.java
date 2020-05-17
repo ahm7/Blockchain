@@ -83,6 +83,26 @@ public class main {
          outputs2.add(output2);
          trans2.put("outputs",outputs2);
 
+         JSONObject trans3 = new JSONObject();
+         trans3.put("hash","096cab0107c9f0666156742fb83719aff7b7d98c04d10176d2268e2dff92a6d9");
+         trans3.put("inputCounter",1);
+         trans3.put("signature","[B@43814d18");
+         trans3.put("outputCounter",1);
+         trans3.put("outputCounter",1);
+         JSONArray inputs3 = new JSONArray();
+         JSONObject input3 = new JSONObject();
+         input3.put("prevTxHash","a6864eb339b0epj6e00d75293a8840abf01292c0fe82e6e53af6ac099793c1d5");
+         input3.put("outputIndex",-1);
+         inputs3.add(input3);
+         trans3.put("inputs",inputs3);
+
+         JSONArray outputs3 = new JSONArray();
+         JSONObject output3 = new JSONObject();
+         output3.put("publicKey","ahmed");
+         output3.put("index",1);
+         outputs3.add(output3);
+         trans3.put("outputs",outputs3);
+
 
 
 
@@ -91,6 +111,7 @@ public class main {
 
              conn.broadcastTx(trans,nodeNumber);
              conn.broadcastTx(trans2,nodeNumber);
+             conn.broadcastTx(trans3,nodeNumber);
          }
          n.recBlocks();
          /*
