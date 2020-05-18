@@ -1,3 +1,5 @@
+package Entities;
+
 public class NodePeers {
 
     private int NodeTo;

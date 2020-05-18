@@ -1,3 +1,8 @@
+package Parsing;
+
+import Parsing.InputsFromText;
+import Parsing.OutputsFromText;
+
 import java.util.ArrayList;
 
 public class TransactionFromText {

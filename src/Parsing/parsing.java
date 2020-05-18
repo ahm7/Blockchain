@@ -1,3 +1,7 @@
+package Parsing;
+
+import Entities.NodePeers;
+
 import java.io.*;
 import java.util.Scanner; // Import the Scanner class to read text files
 import java.util.ArrayList;
@@ -151,14 +155,14 @@ public class parsing {
 
     public void createFile(int nodeNumber) throws IOException {
         String path;
-        path = "TestFiles\\Node" + nodeNumber + "Transactions.txt";
+        path = "TestFiles/Node" + nodeNumber + "Transactions.txt";
         File myObj = new File(path);
         myObj.createNewFile();
     }
 
     public void createSortedFile(int nodeNumber) throws IOException {
         String path;
-        path = "TestFiles\\Node" + nodeNumber + "SortedTransactions.txt";
+        path = "TestFiles/Node" + nodeNumber + "SortedTransactions.txt";
         File myObj = new File(path);
         myObj.createNewFile();
     }

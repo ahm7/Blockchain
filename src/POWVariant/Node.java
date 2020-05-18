@@ -1,3 +1,5 @@
+package POWVariant;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -6,6 +8,8 @@ import java.security.*;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import Entities.*;
+import Helper.*;
 
 public class Node {
 
@@ -16,8 +20,8 @@ public class Node {
     // UTXO list
     // block chain
     // validate block    // don't forget to check double spend
-    // construct transaction
-    // file parsing
+    // construct Entities.transaction
+    // file Parsing.parsing
 
     private PrivateKey privateKey;
     private PublicKey publicKey;
@@ -38,14 +42,13 @@ public class Node {
     public Node(int portNum,int nodeNumber){
         generateKeyPair();
         this.nodeNumber = nodeNumber;
-        //this.UTXO_list = new HashMap<String,JSONObject>();
         this.publicKeys = new ArrayList<>();
         this.portNum = portNum;
 
 
     }
     public void initializeServer(){
-        Server s = new Server(portNum,this);
+        NodeServer s = new NodeServer(portNum,this);
         Thread thread = new Thread(s);
         thread.start();
     }
@@ -256,11 +259,11 @@ public class Node {
 
 
         for(int i=0;i<outputCounter;i++){
-            output_indexes.put((""+(i+1)),1); // if 1 that mean this output index unspend else 0
+            output_indexes.put((""+(i+1)),1); // if 1 that mean this Entities.output index unspend else 0
         }
         transaction.put("used_outputs",output_indexes);
         //System.out.println(hash);
-        //System.out.println(transaction);
+        //System.out.println(Entities.transaction);
         JSONObject t = new JSONObject();
         UTXO_list.put(hash,transaction);
     }
@@ -278,7 +281,7 @@ public class Node {
             //System.out.println("singnatur_is_right : " + singnatur_is_right );
 
         }
-       //boolean value_is_valid = validValue(transaction);
+       //boolean value_is_valid = validValue(Entities.transaction);
 
      return  singnatur_is_right & IS_UTXO ;
     }

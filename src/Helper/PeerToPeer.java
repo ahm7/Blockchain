@@ -1,10 +1,15 @@
+package Helper;
+
+import Entities.Block;
+import Entities.NodePeers;
+import Entities.Vote;
+import Parsing.parsing;
 import org.json.simple.JSONObject;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.List;
 
 public class PeerToPeer {
 
@@ -15,14 +20,19 @@ public class PeerToPeer {
     }
 
     public void sendBlock(String peerIP, int portNum,Block b) throws IOException {
-        Socket socket = new Socket(peerIP, portNum);
-        System.out.println("Connected with "+ peerIP+ "!");
-        OutputStream outputStream = socket.getOutputStream();
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-        System.out.println("Sending Block to the Socket "+ peerIP + " on port " + portNum);
-        objectOutputStream.writeObject(b);
-        System.out.println("Connection with "+ peerIP+ " closed !");
-        socket.close();
+        try{
+            Socket socket = new Socket(peerIP, portNum);
+            System.out.println("Connected with "+ peerIP+ "!");
+            OutputStream outputStream = socket.getOutputStream();
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+            System.out.println("Sending Entities.Block to the Socket "+ peerIP + " on port " + portNum);
+            objectOutputStream.writeObject(b);
+            System.out.println("Connection with "+ peerIP+ " closed !");
+            socket.close();
+        }catch (Exception e){
+
+        }
+
     }
 
     public Block receiveBlock(ServerSocket s) throws IOException, ClassNotFoundException {
@@ -40,31 +50,41 @@ public class PeerToPeer {
         InputStream inputStream = socket.getInputStream();
         ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
         JSONObject transaction = (JSONObject) objectInputStream.readObject();
-        System.out.println("Received transaction !");
+        System.out.println("Received Entities.transaction !");
         socket.close();
         return transaction;
     }
 
     public void sendVote(String peerIP, int portNum,Vote nodeVote) throws IOException {
-        Socket socket = new Socket(peerIP, portNum);
-        System.out.println("Connected with "+ peerIP+ "!");
-        OutputStream outputStream = socket.getOutputStream();
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-        System.out.println("Sending Vote to the Socket "+ peerIP + " on port " + portNum);
-        objectOutputStream.writeObject(nodeVote);
-        System.out.println("Connection with "+ peerIP+ " closed !");
-        socket.close();
+        try{
+            Socket socket = new Socket(peerIP, portNum);
+            System.out.println("Connected with "+ peerIP+ "!");
+            OutputStream outputStream = socket.getOutputStream();
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+            System.out.println("Sending Entities.Vote to the Socket "+ peerIP + " on port " + portNum);
+            objectOutputStream.writeObject(nodeVote);
+            System.out.println("Connection with "+ peerIP+ " closed !");
+            socket.close();
+        }catch (Exception e){
+
+        }
+
     }
 
     public void sendtx(String peerIP, int portNum,JSONObject tx) throws IOException {
-        Socket socket = new Socket(peerIP, portNum);
-        System.out.println("Connected with "+ peerIP+ "!");
-        OutputStream outputStream = socket.getOutputStream();
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-        System.out.println("Sending transaction to the Socket "+ peerIP + " on port " + portNum);
-        objectOutputStream.writeObject(tx);
-        System.out.println("Connection with "+ peerIP+ " closed !");
-        socket.close();
+        try{
+            Socket socket = new Socket(peerIP, portNum);
+            System.out.println("Connected with "+ peerIP+ "!");
+            OutputStream outputStream = socket.getOutputStream();
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+            System.out.println("Sending Entities.transaction to the Socket "+ peerIP + " on port " + portNum);
+            objectOutputStream.writeObject(tx);
+            System.out.println("Connection with "+ peerIP+ " closed !");
+            socket.close();
+        }catch(Exception e){
+
+        }
+
     }
 
     public Vote receiveVote(ServerSocket s) throws IOException, ClassNotFoundException {
@@ -77,10 +97,10 @@ public class PeerToPeer {
         return nodeVote;
     }
 
-    public void broadcastVote(boolean vote, int nodeNumber) throws IOException {
+    public void broadcastVote(Vote nodeVote, int nodeNumber) throws IOException {
         parsing p = new parsing();
         ArrayList<NodePeers> peers = p.readNodePeers(nodeNumber);
-        Vote nodeVote = new Vote(vote);
+
         for(int i = 0 ; i < peers.size() ; i++) {
             String ip = peers.get(i).getIP();
             int port = peers.get(i).getPort();

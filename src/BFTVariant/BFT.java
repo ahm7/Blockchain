@@ -1,7 +1,13 @@
+package BFTVariant;
+import Entities.*;
+import Helper.*;
+import Parsing.*;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.util.ArrayList;
+
 
 public class BFT {
 
@@ -9,8 +15,8 @@ public class BFT {
 
     }
 
-    public void prePrepare(Block b,int nodeNumber) throws IOException {
-        // Miner sends block to leader
+    public void prePrepare(Block b, int nodeNumber) throws IOException {
+        // POWVariant.Miner sends block to leader
         PeerToPeer conn = new PeerToPeer();
         parsing p = new parsing();
         NodePeers nodePort = p.readPort(nodeNumber);
@@ -19,7 +25,7 @@ public class BFT {
         conn.sendBlock(ip, port, b);
     }
 
-    public void prepare(Block b,int nodeNumber) throws IOException {
+    public void prepare(Block b, int nodeNumber) throws IOException {
         // Leader sends block to all nodes in the network
         PeerToPeer conn = new PeerToPeer();
         parsing p = new parsing();
@@ -32,15 +38,15 @@ public class BFT {
         //rest of this stage is in node class
     }
 
-    public boolean commit(int nodeNumber, boolean[] receivedVotes){
+    public boolean commit(int nodeNumber, ArrayList<Vote> receivedVotes){
         // Each node counts number of votes and decide whether to commit or not
         boolean commit = false;
         int trueCount = 0;
-        for(int i = 0;i < receivedVotes.length;i++){
-            if(receivedVotes[i]){
+        for(int i = 0;i < receivedVotes.size();i++){
+            if(receivedVotes.get(i).getNodeVote()){
                 trueCount++;
             }
-            if(trueCount > receivedVotes.length){
+            if(trueCount > receivedVotes.size() / 2){
                 commit = true;
                 break;
             }

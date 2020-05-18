@@ -1,20 +1,18 @@
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+package BFTVariant;
+import Entities.*;
 
-import java.util.ArrayList;
-import java.util.Map;
 
-public class NodeSender extends Thread{
+public class NodeBFTSender extends Thread{
     int methodType = -1;
     Object b = null;
-    Node n = null;
-    public NodeSender(int methodType, Object b, Node n){
+    NodeBFT n = null;
+
+    public NodeBFTSender(int methodType, Object b, NodeBFT n){
         this.methodType = methodType;
         this.b = b;
         this.n = n;
-
-
     }
+
     public void run()
     {
         try{
@@ -23,16 +21,14 @@ public class NodeSender extends Thread{
                 n.validateBlock((Block) b);
                 n.lock.unlock();
             }else if(methodType == 2){
-
-
+                n.lock.lock();
+                n.addToVotes((Vote) b);
+                n.lock.unlock();
             }
-
-
 
         }catch (Exception e){
             System.out.println("Ana 3mlt error ");
         }
 
     }
-
 }

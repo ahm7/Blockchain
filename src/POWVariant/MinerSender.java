@@ -1,3 +1,5 @@
+package POWVariant;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -8,7 +10,9 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import Entities.*;
+import Helper.*;
+
 
 public class MinerSender extends Thread{
     int methodType = -1;
@@ -83,14 +87,14 @@ public class MinerSender extends Thread{
 
             m.branchChanged = false;
         }
-        // if it's not a new transaction filter pending list
+        // if it's not a new Entities.transaction filter pending list
         if(!isnewTransaction) {
             System.out.println("FILTRING PENDING LIST");
             System.out.println("PEnding size : " + m.pending_transactions.size());
             List<String> keys = new ArrayList<String>(m.pending_transactions.keySet());
             for (int i = 0; i < m.pending_transactions.size(); i++) {
                 if (m.all_valid_transactions.containsKey(keys.get(i))) {
-                    System.out.println("Deleting transaction number " + i + " KEy " + keys.get(i));
+                    System.out.println("Deleting Entities.transaction number " + i + " KEy " + keys.get(i));
 
                     m.pending_transactions.remove(keys.get(i));
                 }
@@ -117,7 +121,7 @@ public class MinerSender extends Thread{
                 int outputIndex = (int) inputObject.get("outputIndex");
                 String string_outputIndex = "" + outputIndex;
 
-                // check if prev transaction used but not in main blockchain
+                // check if prev Entities.transaction used but not in main blockchain
                 if (m.all_invalid_prevtransactions.containsKey(prev_tx_hash + string_outputIndex)) {
 
                     if (m.all_invalid_prevtransactions.get(prev_tx_hash + string_outputIndex) == outputIndex) {
@@ -128,7 +132,7 @@ public class MinerSender extends Thread{
 
 
                 }
-                // check if it's a duplicate transaction
+                // check if it's a duplicate Entities.transaction
                 if (m.all_valid_transactions.containsKey(hash)) {
                     double_spend = true;
                 }

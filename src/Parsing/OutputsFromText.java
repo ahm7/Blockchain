@@ -1,3 +1,5 @@
+package Parsing;
+
 public class OutputsFromText {
 
     private int output;

@@ -1,3 +1,5 @@
+package POWVariant;
+
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
@@ -5,12 +7,12 @@ import java.net.Socket;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class Server extends Thread{
+public class MinerServer extends Thread{
     int portNum = -1;
     ServerSocket ss = null;
-    Node n = null;
+    Miner n = null;
     public volatile Queue<Object> blocksRecieved = new LinkedList<>();
-    public Server(int portNum, Node n){
+    public MinerServer(int portNum, Miner n){
         this.portNum = portNum;
         this.n = n;
 
@@ -32,17 +34,21 @@ public class Server extends Thread{
                 if(b != null){
                     Class className = b.getClass();
                     String name = className.getName();
-                    if(name.equals("Block")){
+                    if(name.equals("Entities.Block")){
                         System.out.println("Received BLOCK !");
-                        NodeSender h = new NodeSender(1,b,n);
+                        MinerSender h = new MinerSender(1,b,n);
                         Thread thread = new Thread(h);
                         thread.start();
-                    }else if(name.equals("Vote")){
-                        System.out.println("Received Vote !");
+                    }else if(name.equals("Entities.Vote")){
+                        System.out.println("Received Entities.Vote !");
 
                     }else{
                         //System.out.println(b);
                         System.out.println("Received Transaction !");
+                        MinerSender h = new MinerSender(3,b,n);
+                        Thread thread = new Thread(h);
+                        thread.start();
+
                     }
                 }
                 //System.out.println(b.getMerkleTreeRoot());
@@ -55,14 +61,5 @@ public class Server extends Thread{
         }
     }
 
-    public Object getBlock(){
-
-        if(blocksRecieved.size() != 0){
-            //System.out.println("entered here");
-            return blocksRecieved.remove();
-        }else{
-            return null;
-        }
-    }
 }
 

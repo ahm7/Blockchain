@@ -1,3 +1,5 @@
+package Parsing;
+
 public class InputsFromText {
     private int transactionNumber,input,previousTX = -1,outputIndex = -1;
 

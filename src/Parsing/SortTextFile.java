@@ -1,3 +1,5 @@
+package Parsing;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,7 +9,7 @@ public class SortTextFile {
 
     public void sortTransactionsFile(int nodeNumber) throws IOException {
         BufferedReader reader;
-        String path = "TestFiles\\Node" + nodeNumber + "Transactions.txt";
+        String path = "TestFiles\\POWVariant.Node" + nodeNumber + "Transactions.txt";
         reader = new BufferedReader(new FileReader(path));
         ArrayList<NodeTransaction> nodeTransactions = new ArrayList<NodeTransaction>();
         String currentLine = reader.readLine();
@@ -18,7 +20,7 @@ public class SortTextFile {
             currentLine = reader.readLine();
         }
         Collections.sort(nodeTransactions, new previousTxCompare());
-        path = "TestFiles\\Node" + nodeNumber + "SortedTransactions.txt";
+        path = "TestFiles\\POWVariant.Node" + nodeNumber + "SortedTransactions.txt";
         BufferedWriter writer = new BufferedWriter(new FileWriter(path));
         for (NodeTransaction node : nodeTransactions) {
             writer.write(node.nodeTransaction);

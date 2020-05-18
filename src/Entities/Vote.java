@@ -1,3 +1,5 @@
+package Entities;
+
 import java.io.Serializable;
 
 public class Vote   implements Serializable {
@@ -8,11 +10,13 @@ public class Vote   implements Serializable {
         this.nodeVote = nodeVote;
     }
 
-    public boolean isNodeVote() {
+    public boolean getNodeVote() {
         return nodeVote;
     }
 
     public void setNodeVote(boolean nodeVote) {
         this.nodeVote = nodeVote;
     }
+
+
 }

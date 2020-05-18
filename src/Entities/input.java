@@ -1,5 +1,6 @@
-public class input {
+package Entities;
 
+public class input {
 
        public String prevTxHash ;
        public int outputIndex ;
@@ -8,10 +9,5 @@ public class input {
            this.outputIndex = outputIndex;
            this.prevTxHash = prevTxHash;
        }
-
-    // prev tx hash
-    // outputindex
-    //
-
 
 }

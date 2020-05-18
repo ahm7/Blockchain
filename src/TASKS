@@ -1,30 +1,30 @@
 // PHASE 1
 
                                                                                             priority
-1 - SHA256     PRIVATE KEY                mini task                     morcos                 1
-2 - transaction                             task                        ahmed                 2
-3 - parsing                                nano task                    mahmoud               1
+1 - Helper.SHA256     PRIVATE KEY                mini task                     morcos                 1
+2 - Entities.transaction                             task                        ahmed                 2
+3 - Parsing.parsing                                nano task                    mahmoud               1
 4 - transactiontojson                      mini task                    ahmed                 3
-5 - Block                                    task                       morcos                2
-6 - POW                                      task                       eshraq                3
+5 - Entities.Block                                    task                       morcos                2
+6 - POWVariant.POW                                      task                       eshraq                3
 7 - edit p2p connection ( threading)        mini task                   eshraq                1
-8 - BFT                                       task                      mahmoud               3
+8 - BFTVariant.BFT                                       task                      mahmoud               3
 
 
 
 //phase 2
- Node
- Miner
+ POWVariant.Node
+ POWVariant.Miner
 block0
 miner broadcast block    =>  block1 valid  =>  block3  =
 miner2 broadcast block2  =>  block2 valid  =>  block4
 
-1 - transaction validation ( UTXO - VALUE - SIGNATURE )                                                                    Ahmed
+1 - Entities.transaction validation ( UTXO - VALUE - SIGNATURE )                                                                    Ahmed
 2 - add block to the chain and create the chain                                                                            Ahmed
-3 - validate the block  ( check all transaction is valid => add or if there is collison wait for the longest chain )       Eshraq
+3 - validate the block  ( check all Entities.transaction is valid => add or if there is collison wait for the longest chain )       Eshraq
 4 - broadcasting function in miner      ( check visited )                                                                  Eshraq
 5 - function to add transactions in block                                                                                  Morcos
-6 - choose Node transactions   ( use constructTransactions function in main to extract the node's transactions )           Mahmoud
-7 - issue transaction
+6 - choose POWVariant.Node transactions   ( use constructTransactions function in main to extract the node's transactions )           Mahmoud
+7 - issue Entities.transaction
                                                                                                                              Morcos
  Dead line    is      15 / 5  11:59 pm

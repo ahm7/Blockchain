@@ -1,9 +1,7 @@
-import com.sun.jdi.Value;
-import org.json.simple.JSONArray;
+package POWVariant;
+
 import org.json.simple.JSONObject;
 
-import javax.swing.*;
-import java.awt.image.ByteLookupTable;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -12,6 +10,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import Entities.*;
+import Helper.*;
 
 public class Miner extends Node {
 
@@ -37,13 +37,13 @@ public class Miner extends Node {
         Thread thread = new Thread(s);
         thread.start();
     }
-    // Miner
+    // POWVariant.Miner
     // construct block
     // proof of work
     // broadcast
-    // BFT
+    // BFTVariant.BFT
     // validate transactions
-    // ArrayList of transaction
+    // ArrayList of Entities.transaction
     //
 
 
@@ -188,7 +188,7 @@ public class Miner extends Node {
                         for(int z = 0 ; z <= j ; z++){
                             collisionList.add(pendingBlocks.get(i).get(z));
                         }
-                        // add block transaction to this branch
+                        // add block Entities.transaction to this branch
                         Map<String,JSONObject>  temp1= new HashMap(branches_transactions.get(i));
 
                         for(int k=0; k<b.getTransactions().size();k++){

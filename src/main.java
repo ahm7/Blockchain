@@ -1,35 +1,106 @@
+import BFTVariant.LeaderBFT;
+import BFTVariant.MinerBFT;
+import BFTVariant.NodeBFT;
+import Entities.*;
+import Helper.PeerToPeer;
+import Helper.SHA256;
+import POWVariant.Node;
+import Parsing.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.awt.image.AreaAveragingScaleFilter;
 import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.*;
-import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.Timestamp;
-import java.util.concurrent.ThreadLocalRandom;
-import org.json.simple.parser.JSONParser;
+import Entities.*;
+import Helper.*;
+import Parsing.*;
+import BFTVariant.*;
+import POWVariant.*;
+
+
 import org.json.simple.parser.ParseException;
-import java.sql.Timestamp;
-import java.util.spi.AbstractResourceBundleProvider;
 
 public class main {
 
      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException, InvalidKeySpecException, URISyntaxException, NoSuchProviderException {
-/*
+         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+         int nodeNumber = Integer.parseInt(args[0]);
+         parsing p = new parsing();
+         NodePeers node = p.readPort(nodeNumber);
+         int port = node.getPort();
+         NodeBFT n;
+         if(port == 4001){
+             n = new MinerBFT(port,nodeNumber);
+         }else if( port == 4000){
+             n = new NodeBFT(port,nodeNumber);
+         }else {
+             n = new LeaderBFT(port,nodeNumber);
+         }
+         n.initializeServer();
+         ArrayList<JSONObject> transactions=  constructTransactions();
 
+         ArrayList<Block> blocks  = new ArrayList<Block>();
+         int k =0;
+         String blockHashValue1 = "";
+         Timestamp time = new Timestamp(50);
+
+         for(int i=0;i<6;i++){
+             ArrayList<JSONObject> transaction = new ArrayList<JSONObject>();
+             transaction.add(transactions.get(k));
+             k++;
+             transaction.add(transactions.get(k));
+             k++;
+             Block b0 = new Block();
+
+             b0.setNonce(0);
+             b0.setTransactions(transaction);
+             b0.generateBlockHash();
+             b0.setTimestamp(time);
+             b0.setPreviousBlockHash(blockHashValue1);
+             blockHashValue1 = "";
+             blockHashValue1 += b0.getPreviousBlockHash();
+             blockHashValue1 += b0.getMerkleTreeRoot();
+             blockHashValue1 += b0.getTimestamp();
+             blockHashValue1 += b0.getNonce();
+             SHA256 hash = new SHA256();
+             blockHashValue1 = hash.generateHash(blockHashValue1);
+             System.out.println(i + " EL hash bt3ha  : " + blockHashValue1);
+
+             blocks.add(b0);
+         }
+
+
+
+         n.addToBlockchain(true,blocks.get(0));
+         n.addToBlockchain(true,blocks.get(1));
+         n.addToBlockchain(true,blocks.get(2));
+         System.out.println("Blockchain size : " + n.blockChain.size());
+         if(port == 4002){
+             //n.validateBlock(blocks.get(3));
+             //n.validateBlock(blocks.get(4));
+             //n.validateBlock(blocks.get(5));
+         }
+         if(port == 4002){
+             PeerToPeer conn = new PeerToPeer();
+
+             conn.broadcastTx(transactions.get(15),nodeNumber);
+             System.out.println(transactions.get(15).get("hash"));
+             conn.broadcastTx(transactions.get(16),nodeNumber);
+             System.out.println(transactions.get(16).get("hash"));
+         }
+
+
+
+
+/*
          for (int i=0;i<50;i++){
          KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
          KeyPair keyPair = keyGen.generateKeyPair();
@@ -68,7 +139,7 @@ public class main {
          }
 
 
- */
+
 
 
 
@@ -78,38 +149,38 @@ public class main {
 
          Timestamp timestamp = new Timestamp(System.currentTimeMillis());
          int nodeNumber = Integer.parseInt(args[0]);
-         parsing p = new parsing();
-         NodePeers node = p.readPort(nodeNumber);
+         Parsing.parsing p = new Parsing.parsing();
+         Entities.NodePeers node = p.readPort(nodeNumber);
          int port = node.getPort();
 
-         //Miner n = new Miner(port,nodeNumber);
+         //POWVariant.Miner n = new POWVariant.Miner(port,nodeNumber);
 
-         Node n;
+         POWVariant.Node n;
          if(port == 4001){
-             n = new Miner(port,nodeNumber);
+             n = new POWVariant.Miner(port,nodeNumber);
          }else{
-             n = new Node(port,nodeNumber);
+             n = new POWVariant.Node(port,nodeNumber);
          }
          n.initializeServer();
 
 
          ///
 
-         ArrayList<Block> blocks  = new ArrayList<Block>();
+         ArrayList<Entities.Block> blocks  = new ArrayList<Entities.Block>();
          int k =0;
          String blockHashValue1 = "";
          Timestamp time = new Timestamp(50);
 
          for(int i=0;i<6;i++){
-             ArrayList<JSONObject> transaction = new ArrayList<JSONObject>();
-             transaction.add(transactions.get(k));
+             ArrayList<JSONObject> Entities.transaction = new ArrayList<JSONObject>();
+             Entities.transaction.add(transactions.get(k));
              k++;
-             transaction.add(transactions.get(k));
+             Entities.transaction.add(transactions.get(k));
              k++;
-             Block b0 = new Block();
+             Entities.Block b0 = new Entities.Block();
 
              b0.setNonce(i);
-             b0.setTransactions(transaction);
+             b0.setTransactions(Entities.transaction);
              b0.generateBlockHash();
              b0.setTimestamp(time);
              b0.setPreviousBlockHash(blockHashValue1);
@@ -118,7 +189,7 @@ public class main {
              blockHashValue1 += b0.getMerkleTreeRoot();
              blockHashValue1 += b0.getTimestamp();
              blockHashValue1 += b0.getNonce();
-             SHA256 hash = new SHA256();
+             Helper.SHA256 hash = new Helper.SHA256();
              blockHashValue1 = hash.generateHash(blockHashValue1);
              System.out.println(i + " EL hash bt3ha  : " + blockHashValue1);
 
@@ -136,21 +207,21 @@ public class main {
 
 
          if(port == 4000){
-              PeerToPeer conn = new PeerToPeer();
+              Helper.PeerToPeer conn = new Helper.PeerToPeer();
 
               conn.broadcastTx(transactions.get(15),nodeNumber);
               System.out.println(transactions.get(15).get("hash"));
               conn.broadcastTx(transactions.get(16),nodeNumber);
              System.out.println(transactions.get(16).get("hash"));
          }
-
+*/
 /*
 
          ///
          if(port == 4000){
-             Block b = new Block();
+             Entities.Block b = new Entities.Block();
              b.setMerkleTreeRoot("dummy");
-             PeerToPeer conn = new PeerToPeer();
+             Helper.PeerToPeer conn = new Helper.PeerToPeer();
 
             conn.broadcastBlock(b,nodeNumber);
          }
@@ -165,17 +236,17 @@ public class main {
          trans.put("outputCounter",1);
          trans.put("outputCounter",1);
          JSONArray inputs = new JSONArray();
-         JSONObject input = new JSONObject();
-         input.put("prevTxHash","a6864eb339b0e1f6e00d75293a8840abf069a2c0fe82e6e53af6ac099793c1d5");
-         input.put("outputIndex",-1);
-         inputs.add(input);
+         JSONObject Entities.input = new JSONObject();
+         Entities.input.put("prevTxHash","a6864eb339b0e1f6e00d75293a8840abf069a2c0fe82e6e53af6ac099793c1d5");
+         Entities.input.put("outputIndex",-1);
+         inputs.add(Entities.input);
          trans.put("inputs",inputs);
 
          JSONArray outputs = new JSONArray();
-         JSONObject output = new JSONObject();
-         output.put("publicKey","ahmed");
-         output.put("index",1);
-         outputs.add(output);
+         JSONObject Entities.output = new JSONObject();
+         Entities.output.put("publicKey","ahmed");
+         Entities.output.put("index",1);
+         outputs.add(Entities.output);
          trans.put("outputs",outputs);
 
          JSONObject trans2 = new JSONObject();
@@ -222,7 +293,7 @@ public class main {
 
 
          if(port == 4000){
-             PeerToPeer conn = new PeerToPeer();
+             Helper.PeerToPeer conn = new Helper.PeerToPeer();
 
              conn.broadcastTx(trans,nodeNumber);
              conn.broadcastTx(trans2,nodeNumber);
@@ -232,26 +303,26 @@ public class main {
 
   */
          /*
-         Block b = new Block();
+         Entities.Block b = new Entities.Block();
          Class className = b.getClass();
          System.out.println(className.getName());
        */
 
          /*System.out.println(args[0]);
          int nodeNumber = Integer.parseInt(args[0]);
-         parsing p = new parsing();
-         NodePeers node = p.readPort(nodeNumber);
+         Parsing.parsing p = new Parsing.parsing();
+         Entities.NodePeers node = p.readPort(nodeNumber);
          int port = node.getPort();
          System.out.println(port);
 
-         PeerToPeer connect = new PeerToPeer();
+         Helper.PeerToPeer connect = new Helper.PeerToPeer();
          ServerSocket s = connect.openConnection(port);
          if(port == 4000){
              testConnection();
          }
          Socket socket = s.accept();
          System.out.println(socket);
-         Block b = connect.receiveBlock(socket);
+         Entities.Block b = connect.receiveBlock(socket);
          System.out.println(b.getMerkleTreeRoot());
          //while(true){
            //  connect.receiveBlock(s);
@@ -261,7 +332,7 @@ public class main {
 */
          /*
          JSONParser parser = new JSONParser();
-         Node node  = new Node();
+         POWVariant.Node node  = new POWVariant.Node();
          //JSONArray a = (JSONArray) parser.parse(new FileReader("testFiles/txs.json"));
 
          int i=0;
@@ -283,10 +354,10 @@ public class main {
         //testSplitNodeTransactions();
 */
          //testTransactionsWithBlock();
-/*         Node n = new Node();
+/*         POWVariant.Node n = new POWVariant.Node();
          Timestamp time = new Timestamp(System.currentTimeMillis());
 
-         Block b0 = new Block();
+         Entities.Block b0 = new Entities.Block();
 
          b0.setNonce(20);
          b0.setMerkleTreeRoot("0");
@@ -299,7 +370,7 @@ public class main {
          blockHashValue1 += b0.getTimestamp();
          blockHashValue1 += b0.getNonce();
 
-         Block b1 = new Block();
+         Entities.Block b1 = new Entities.Block();
 
          b1.setPreviousBlockHash(blockHashValue1);
          b1.setNonce(20);
@@ -312,7 +383,7 @@ public class main {
          blockHashValue2 += b1.getTimestamp();
          blockHashValue2 += b1.getNonce();
 
-         Block b2 = new Block();
+         Entities.Block b2 = new Entities.Block();
 
 
 
@@ -327,7 +398,7 @@ public class main {
          blockHashValue3 += b2.getTimestamp();
          blockHashValue3 += b2.getNonce();
 
-         Block b3 = new Block();
+         Entities.Block b3 = new Entities.Block();
 
          b3.setPreviousBlockHash(blockHashValue3);
          b3.setNonce(20);
@@ -341,7 +412,7 @@ public class main {
          blockHashValue4 += b3.getNonce();
 
 
-         Block b4 = new Block();
+         Entities.Block b4 = new Entities.Block();
 
          b4.setPreviousBlockHash(blockHashValue4);
          b4.setNonce(20);
@@ -354,7 +425,7 @@ public class main {
          blockHashValue5 += b4.getTimestamp();
          blockHashValue5 += b4.getNonce();
 
-         Block b5 = new Block();
+         Entities.Block b5 = new Entities.Block();
 
          b5.setPreviousBlockHash(blockHashValue5);
          b5.setNonce(20);
@@ -367,7 +438,7 @@ public class main {
          blockHashValue6 += b5.getTimestamp();
          blockHashValue6 += b5.getNonce();
 
-         Block b7 = new Block();
+         Entities.Block b7 = new Entities.Block();
 
          b7.setPreviousBlockHash(blockHashValue1);
          b7.setNonce(20);
@@ -380,7 +451,7 @@ public class main {
          blockHashValue8 += b7.getTimestamp();
          blockHashValue8 += b7.getNonce();
 
-         Block b8 = new Block();
+         Entities.Block b8 = new Entities.Block();
 
          b8.setPreviousBlockHash(blockHashValue4);
          b8.setNonce(20);
@@ -393,7 +464,7 @@ public class main {
          blockHashValue9 += b8.getTimestamp();
          blockHashValue9 += b8.getNonce();
 
-         Block b9 = new Block();
+         Entities.Block b9 = new Entities.Block();
 
          b9.setPreviousBlockHash(blockHashValue9);
          b9.setNonce(20);
@@ -406,7 +477,7 @@ public class main {
          blockHashValue10 += b9.getTimestamp();
          blockHashValue10 += b9.getNonce();
 
-         Block b10 = new Block();
+         Entities.Block b10 = new Entities.Block();
 
          b10.setPreviousBlockHash(blockHashValue10);
          b10.setNonce(20);
@@ -419,7 +490,7 @@ public class main {
          blockHashValue11 += b10.getTimestamp();
          blockHashValue11 += b10.getNonce();
 
-         Block b11 = new Block();
+         Entities.Block b11 = new Entities.Block();
 
          b11.setPreviousBlockHash(blockHashValue11);
          b11.setNonce(20);
@@ -488,7 +559,7 @@ public class main {
         SHA256 hasher = new SHA256();
         String prev_hash = hasher.generateHash("ahmedHesham");
         input  input = new input(prev_hash,1);
-        ArrayList<input> inputs  = new ArrayList<input>();
+        ArrayList<Entities.input> inputs  = new ArrayList<input>();
         inputs.add(input);
         transaction.setInputs(inputs);
 
@@ -596,7 +667,7 @@ public class main {
             transaction.setHash();
             transaction.setSignature(privateKeys[input_parse.getInput()]);
 
-            //System.out.println(transaction.getTransactionObject().get("hash"));
+            //System.out.println(Entities.transaction.getTransactionObject().get("hash"));
             map_txNum_to_hash.put(i+1,transaction.getTransactionObject().get("hash").toString());
 
             JSONObject test =  transaction.getTransactionObject();
@@ -798,7 +869,7 @@ public class main {
         blockHashValue10 += b9.getTimestamp();
         blockHashValue10 += b9.getNonce();
 
-    /*    Block b10 = new Block();
+    /*    Entities.Block b10 = new Entities.Block();
 
         b10.setPreviousBlockHash(blockHashValue10);
         b10.setNonce(10);

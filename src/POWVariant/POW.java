@@ -1,9 +1,15 @@
+package POWVariant;
+import Entities.*;
+import Helper.*;
+
+import POWVariant.Miner;
+
 public class POW {
 
     private Block block;
     private int difficulty;
     Miner m = null ;
-    public POW(Block b,int difficulty,Miner m){
+    public POW(Block b, int difficulty, Miner m){
      this.block = b;
      this.difficulty = difficulty;
      this.m = m;

@@ -1,3 +1,5 @@
+package Entities;
+
 import netscape.javascript.JSObject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -6,6 +8,8 @@ import java.util.ArrayList;
 import java.lang.Math;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import Helper.*;
+
 
 public class Block implements Serializable{
 
