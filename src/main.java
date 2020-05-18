@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.Timestamp;
+import java.util.Scanner;
+
 import Entities.*;
 import Helper.*;
 import Parsing.*;
@@ -31,6 +33,102 @@ import org.json.simple.parser.ParseException;
 public class main {
 
      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException, InvalidKeySpecException, URISyntaxException, NoSuchProviderException {
+         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+         int nodeNumber = Integer.parseInt(args[0]);
+         parsing p = new parsing();
+         NodePeers node = p.readPort(nodeNumber);
+         int port = node.getPort();
+
+         // set transaction
+         String  path = "testFiles/Node"+nodeNumber+"Transactions.txt";
+         // String path = "testFiles/txdataset_v2.txt";
+         ArrayList<JSONObject> transactions = new ArrayList<>();
+         transactions = constructTransactions(path, nodeNumber);
+
+         System.out.println("end reading ");
+         System.out.println(transactions.size());
+
+         //Miner n = new Miner(port,nodeNumber);
+
+         Node n;
+         if(port == 4000 || port == 4001){
+             n = new Miner(port,nodeNumber);
+         }else{
+             n = new Node(port,nodeNumber);
+         }
+         n.initializeServer();
+         n.setTrasactions(transactions);
+
+         ///
+         ArrayList<Block> blocks  = new ArrayList<Block>();
+         int k =0;
+         String blockHashValue1 = "";
+         Timestamp time = new Timestamp(50);
+
+         String [] blockHashes = new String[7];
+         for(int i=0;i<7;i++){
+             ArrayList<JSONObject> transaction = new ArrayList<JSONObject>();
+             transaction.add(transactions.get(k));
+             k++;
+             transaction.add(transactions.get(k));
+             k++;
+             Block b0 = new Block();
+
+             b0.setNonce(i);
+             b0.setTransactions(transaction);
+             b0.generateBlockHash();
+             b0.setTimestamp(time);
+             b0.setPreviousBlockHash(blockHashValue1);
+             blockHashValue1 = "";
+             if(i!=0 && i%3 ==0){
+                 b0.setPreviousBlockHash(blockHashes[i-2]);
+             }
+             blockHashValue1 += b0.getPreviousBlockHash();
+             blockHashValue1 += b0.getMerkleTreeRoot();
+             blockHashValue1 += b0.getTimestamp();
+             blockHashValue1 += b0.getNonce();
+             SHA256 hash = new SHA256();
+             blockHashValue1 = hash.generateHash(blockHashValue1);
+             blockHashes[i]=blockHashValue1;
+             System.out.println(i + " EL hash bt3ha  : " + blockHashValue1);
+             System.out.println(i + " EL prev hash bt3ha  : " + b0.getPreviousBlockHash());
+
+             blocks.add(b0);
+         }
+
+         n.addToBlockchain(true,blocks.get(0));
+         n.addToBlockchain(true,blocks.get(1));
+         n.addToBlockchain(true,blocks.get(2));
+         if(port == 4000){
+             //n.validateBlock(blocks.get(3));
+             //n.validateBlock(blocks.get(4));
+             //n.validateBlock(blocks.get(5));
+             //n.validateBlock(blocks.get(6));
+         }
+         if(port == 4002) {
+             PeerToPeer conn = new PeerToPeer();
+
+             conn.broadcastTx(transactions.get(6), nodeNumber);
+             System.out.println(transactions.get(6).get("hash"));
+             conn.broadcastTx(transactions.get(7), nodeNumber);
+             System.out.println(transactions.get(7).get("hash"));
+
+             conn.broadcastTx(transactions.get(8), nodeNumber);
+             System.out.println(transactions.get(8).get("hash"));
+             conn.broadcastTx(transactions.get(9), nodeNumber);
+             System.out.println(transactions.get(9).get("hash"));
+
+             conn.broadcastTx(transactions.get(10), nodeNumber);
+             System.out.println(transactions.get(10).get("hash"));
+             conn.broadcastTx(transactions.get(11), nodeNumber);
+             System.out.println(transactions.get(11).get("hash"));
+
+             conn.broadcastTx(transactions.get(12), nodeNumber);
+             System.out.println(transactions.get(12).get("hash"));
+             conn.broadcastTx(transactions.get(13), nodeNumber);
+             System.out.println(transactions.get(13).get("hash"));
+         }
+         /*
          Timestamp timestamp = new Timestamp(System.currentTimeMillis());
          int nodeNumber = Integer.parseInt(args[0]);
          parsing p = new parsing();
@@ -99,7 +197,7 @@ public class main {
 
 
 
-
+*/
 /*
          for (int i=0;i<50;i++){
          KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
@@ -531,20 +629,20 @@ public class main {
     }
 
     public static void testSortFile() throws IOException {
-         for(int i = 1;i < 50;i++){
-             parsing p = new parsing();
-             p.createSortedFile(i);
-             SortTextFile sorting = new SortTextFile();
-             sorting.sortTransactionsFile(i);
-         }
+        for(int i = 1;i < 50;i++){
+            parsing p = new parsing();
+            p.createSortedFile(i);
+            SortTextFile sorting = new SortTextFile();
+            sorting.sortTransactionsFile(i);
+        }
     }
 
     public static void testSplitNodeTransactions() throws IOException {
-         parsing p = new parsing();
-         for(int i = 0;i < 50;i++){
-             p.createFile(i);
-         }
-         p.writeNodeTransactions();
+        parsing p = new parsing();
+        for(int i = 0;i < 50;i++){
+            p.createFile(i);
+        }
+        p.writeNodeTransactions();
     }
 
     public static void testCreateTransaction() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, FileNotFoundException {
@@ -559,7 +657,7 @@ public class main {
         SHA256 hasher = new SHA256();
         String prev_hash = hasher.generateHash("ahmedHesham");
         input  input = new input(prev_hash,1);
-        ArrayList<Entities.input> inputs  = new ArrayList<input>();
+        ArrayList<input> inputs  = new ArrayList<input>();
         inputs.add(input);
         transaction.setInputs(inputs);
 
@@ -595,20 +693,35 @@ public class main {
 
     }
 
-    public  static  ArrayList<JSONObject>  constructTransactions() throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, IOException, InvalidKeySpecException {
-         SHA256 hasher = new SHA256();
+    public  static  ArrayList<JSONObject>  constructTransactions(String path,int NodeNum) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, IOException, InvalidKeySpecException {
+        SHA256 hasher = new SHA256();
         parsing parse = new parsing();
-        ArrayList<TransactionFromText> transaction_parse = parse.readDataset();
-        //System.out.println("traparse"+" "+ transaction_parse.size());
-
+        ArrayList<TransactionFromText> transaction_parse = parse.readDataset(path);
+        System.out.println(transaction_parse.get(0));
+        System.out.println(transaction_parse.get(1));
+        System.out.println("traparse"+" "+ transaction_parse.size());
 
         Map<Integer,String> map_txNum_to_hash = new HashMap<Integer,String>();
         String hash_temp = hasher.generateHash("temp");
         map_txNum_to_hash.put(-1,hash_temp);
         // initialize 50 nodes
 
-        PrivateKey [] privateKeys = new PrivateKey[50];
-        PublicKey [] publicKeys = new PublicKey[50];
+        PrivateKey  privateKey = null;
+        PublicKey  publicKeys [] = new PublicKey[50];
+
+        try {
+            File myObj = new File("transaction_hash.txt");
+            Scanner myReader = new Scanner(myObj);
+            int k=1;
+            while (myReader.hasNextLine()) {
+                map_txNum_to_hash.put(k,myReader.nextLine());
+                k++;
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
 
         for(int i=0;i<50;i++){
 
@@ -618,33 +731,31 @@ public class main {
             inputStream.read(allBytes);
             KeyFactory kf = KeyFactory.getInstance("RSA"); // or "EC" or whatever
             publicKeys[i] = kf.generatePublic(new X509EncodedKeySpec(allBytes));
-
-
-            inputStream = new FileInputStream("testFiles/keys"+i+"p"+".txt");
-            fileSize = new File("testFiles/keys"+i+"p"+".txt").length();
-            allBytes = new byte[(int) fileSize];
-            inputStream.read(allBytes);
-            KeyFactory kf1 = KeyFactory.getInstance("RSA"); // or "EC" or whatever
-            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(allBytes);
-            privateKeys[i] = kf1.generatePrivate(spec);
-
         }
+        InputStream inputStream = new FileInputStream("testFiles/keys"+NodeNum+"p"+".txt");
+        long fileSize = new File("testFiles/keys"+NodeNum+"p"+".txt").length();
+        byte[]  allBytes = new byte[(int) fileSize];
+        inputStream.read(allBytes);
+        KeyFactory kf1 = KeyFactory.getInstance("RSA"); // or "EC" or whatever
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(allBytes);
+        privateKey = kf1.generatePrivate(spec);
 
 
         ArrayList<JSONObject> transactions_objects = new ArrayList<JSONObject>();
         for(int i=0;i<transaction_parse.size();i++){
 
+            System.out.println(i);
             ArrayList<OutputsFromText>  outputs_parse = transaction_parse.get(i).getOutputs();
             InputsFromText input_parse    =  transaction_parse.get(i).getInputs();
 
             PublicKey publicKey = publicKeys[input_parse.getInput()];
-            PrivateKey privateKey = privateKeys[input_parse.getInput()];
 
             transaction transaction = new transaction();
 
             transaction.setInputCounter(1);
 
             String prev_hash = map_txNum_to_hash.get(input_parse.getPreviousTX());
+            System.out.println(prev_hash);
             input  input = new input(prev_hash,input_parse.getOutputIndex());
             ArrayList<input> inputs  = new ArrayList<input>();
             inputs.add(input);
@@ -665,13 +776,13 @@ public class main {
             transaction.setOutputs(outputs);
 
             transaction.setHash();
-            transaction.setSignature(privateKeys[input_parse.getInput()]);
+            transaction.setSignature(privateKey);
 
-            //System.out.println(Entities.transaction.getTransactionObject().get("hash"));
-            map_txNum_to_hash.put(i+1,transaction.getTransactionObject().get("hash").toString());
+            //System.out.println(transaction.getTransactionObject().get("hash"));
+            ///map_txNum_to_hash.put(i+1,transaction.getTransactionObject().get("hash").toString());
 
             JSONObject test =  transaction.getTransactionObject();
-           // System.out.println(test);
+            // System.out.println(test);
 
 
             transactions_objects.add(test);
@@ -681,230 +792,8 @@ public class main {
     }
 
     public static void testDatasetParser(){
-         parsing parse = new parsing();
-         ArrayList<TransactionFromText> transactions = parse.readDataset();
-         //System.out.println("done");
-    }
-
-    public static  void testTransactionsWithBlock() throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException {
-
-        ArrayList<JSONObject> transactions_objects = constructTransactions();
-        //System.out.println("trasize"+" "+ transactions_objects.size());
-        JSONArray a = new JSONArray();
-        for(int k=0;k<transactions_objects.size();k++){
-            a.add(transactions_objects.get(k));
-        }
-        //System.out.println(transactions_objects.size());
-
-
-        Node n = new Node(1,2);
-        Timestamp time = new Timestamp(System.currentTimeMillis());
-
-        Block b0 = new Block();
-
-        b0.setNonce(0);
-        ArrayList<JSONObject> t0 = new ArrayList<>();
-        t0.add(transactions_objects.get(0));
-        t0.add(transactions_objects.get(1));
-        b0.setTransactions(t0);
-        b0.generateBlockHash();
-        //b0.setMerkleTreeRoot("0");
-        b0.setTimestamp(time);
-        b0.setPreviousBlockHash("0");
-
-        String blockHashValue1 = "";
-        blockHashValue1 += b0.getPreviousBlockHash();
-        blockHashValue1 += b0.getMerkleTreeRoot();
-        blockHashValue1 += b0.getTimestamp();
-        blockHashValue1 += b0.getNonce();
-
-        Block b1 = new Block();
-
-        b1.setPreviousBlockHash(blockHashValue1);
-        b1.setNonce(1);
-        ArrayList<JSONObject> t1 = new ArrayList<>();
-        t1.add(transactions_objects.get(2));
-        t1.add(transactions_objects.get(3));
-        b1.setTransactions(t1);
-        b1.generateBlockHash();
-        //b1.setMerkleTreeRoot("1");
-        b1.setTimestamp(time);
-
-//
-        String blockHashValue2 = "";
-        blockHashValue2 += b1.getPreviousBlockHash();
-        blockHashValue2 += b1.getMerkleTreeRoot();
-        blockHashValue2 += b1.getTimestamp();
-        blockHashValue2 += b1.getNonce();
-
-        Block b2 = new Block();
-
-
-
-        b2.setPreviousBlockHash(blockHashValue2);
-        b2.setNonce(2);
-        //b2.setMerkleTreeRoot("2");
-        ArrayList<JSONObject> t2 = new ArrayList<>();
-        t2.add(transactions_objects.get(4));
-        t2.add(transactions_objects.get(5));
-        b2.setTransactions(t2);
-        b2.generateBlockHash();
-        b2.setTimestamp(time);
-
-
-        String blockHashValue3 = "";
-        blockHashValue3 += b2.getPreviousBlockHash();
-        blockHashValue3 += b2.getMerkleTreeRoot();
-        blockHashValue3 += b2.getTimestamp();
-        blockHashValue3 += b2.getNonce();
-
-        Block b3 = new Block();
-
-        b3.setPreviousBlockHash(blockHashValue3);
-        b3.setNonce(3);
-        //b3.setMerkleTreeRoot("3");
-        b3.setTimestamp(time);
-
-        ArrayList<JSONObject> t3 = new ArrayList<>();
-        t3.add(transactions_objects.get(6));
-        t3.add(transactions_objects.get(7));
-        b3.setTransactions(t3);
-        b3.generateBlockHash();
-
-        String blockHashValue4 = "";
-        blockHashValue4 += b3.getPreviousBlockHash();
-        blockHashValue4 += b3.getMerkleTreeRoot();
-        blockHashValue4 += b3.getTimestamp();
-        blockHashValue4 += b3.getNonce();
-
-
-        Block b4 = new Block();
-
-        b4.setPreviousBlockHash(blockHashValue4);
-        b4.setNonce(4);
-        //b4.setMerkleTreeRoot("4");
-        b4.setTimestamp(time);
-        ArrayList<JSONObject> t4 = new ArrayList<>();
-        t4.add(transactions_objects.get(8));
-        t4.add(transactions_objects.get(9));
-        b4.setTransactions(t4);
-        b4.generateBlockHash();
-
-        String blockHashValue5 = "";
-        blockHashValue5 += b4.getPreviousBlockHash();
-        blockHashValue5 += b4.getMerkleTreeRoot();
-        blockHashValue5 += b4.getTimestamp();
-        blockHashValue5 += b4.getNonce();
-
-        Block b5 = new Block();
-
-        b5.setPreviousBlockHash(blockHashValue5);
-        b5.setNonce(5);
-        //b5.setMerkleTreeRoot("5");
-        b5.setTimestamp(time);
-        ArrayList<JSONObject> t5 = new ArrayList<>();
-        t5.add(transactions_objects.get(10));
-        t5.add(transactions_objects.get(11));
-        b5.setTransactions(t5);
-        b5.generateBlockHash();
-
-
-        String blockHashValue6 = "";
-        blockHashValue6 += b5.getPreviousBlockHash();
-        blockHashValue6 += b5.getMerkleTreeRoot();
-        blockHashValue6 += b5.getTimestamp();
-        blockHashValue6 += b5.getNonce();
-
-        Block b7 = new Block();
-
-        b7.setPreviousBlockHash(blockHashValue6);
-        b7.setNonce(7);
-       // b7.setMerkleTreeRoot("7");
-        b7.setTimestamp(time);
-        ArrayList<JSONObject> t7 = new ArrayList<>();
-        t7.add(transactions_objects.get(12));
-        t7.add(transactions_objects.get(13));
-        b7.setTransactions(t7);
-        b7.generateBlockHash();
-
-        String blockHashValue8 = "";
-        blockHashValue8 += b7.getPreviousBlockHash();
-        blockHashValue8 += b7.getMerkleTreeRoot();
-        blockHashValue8 += b7.getTimestamp();
-        blockHashValue8 += b7.getNonce();
-
-        Block b8 = new Block();
-
-        b8.setPreviousBlockHash(blockHashValue8);
-        b8.setNonce(8);
-        //b8.setMerkleTreeRoot("8");
-        b8.setTimestamp(time);
-        ArrayList<JSONObject> t8 = new ArrayList<>();
-        t8.add(transactions_objects.get(14));
-        t8.add(transactions_objects.get(15));
-        b8.setTransactions(t8);
-        b8.generateBlockHash();
-
-        String blockHashValue9 = "";
-        blockHashValue9 += b8.getPreviousBlockHash();
-        blockHashValue9 += b8.getMerkleTreeRoot();
-        blockHashValue9 += b8.getTimestamp();
-        blockHashValue9 += b8.getNonce();
-
-        Block b9 = new Block();
-
-        b9.setPreviousBlockHash(blockHashValue9);
-        b9.setNonce(9);
-        //b9.setMerkleTreeRoot("9");
-        b9.setTimestamp(time);
-        ArrayList<JSONObject> t9 = new ArrayList<>();
-        t9.add(transactions_objects.get(16));
-        t9.add(transactions_objects.get(17));
-        b9.setTransactions(t9);
-        b9.generateBlockHash();
-
-        String blockHashValue10 = "";
-        blockHashValue10 += b9.getPreviousBlockHash();
-        blockHashValue10 += b9.getMerkleTreeRoot();
-        blockHashValue10 += b9.getTimestamp();
-        blockHashValue10 += b9.getNonce();
-
-    /*    Entities.Block b10 = new Entities.Block();
-
-        b10.setPreviousBlockHash(blockHashValue10);
-        b10.setNonce(10);
-        //b10.setMerkleTreeRoot("10");
-        b10.setTimestamp(time);
-        ArrayList<JSONObject> t10 = new ArrayList<>();
-        t10.add(transactions_objects.get(16));
-        t10.add(transactions_objects.get(17));
-        b10.setTransactions(t10);
-        b10.generateBlockHash();
-*/
-
-        //n.validateBlock(b0);
-        //n.validateBlock(b1);
-        //n.validateBlock(b2);
-        n.addToBlockchain(true,b0);
-        n.addToBlockchain(true,b1);
-        n.addToBlockchain(true,b2);
-        //System.out.println("b7");
-        n.validateBlock(b3);
-        //System.out.println("b3");
-        n.validateBlock(b4);
-        //System.out.println("b4");
-        n.validateBlock(b5);
-        //System.out.println("b8");
-        n.validateBlock(b7);
-        //System.out.println("b5");
-        n.validateBlock(b8);
-        //System.out.println("b9");
-        n.validateBlock(b9);
-        //System.out.println("b10");
-        //n.validateBlock(b10);
-        //System.out.println("b");
-
-
-
+        parsing parse = new parsing();
+        //ArrayList<TransactionFromText> transactions = parse.readDataset();
+        //System.out.println("done");
     }
 }

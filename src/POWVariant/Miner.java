@@ -37,13 +37,13 @@ public class Miner extends Node {
         Thread thread = new Thread(s);
         thread.start();
     }
-    // POWVariant.Miner
+    // Miner
     // construct block
     // proof of work
     // broadcast
-    // BFTVariant.BFT
+    // BFT
     // validate transactions
-    // ArrayList of Entities.transaction
+    // ArrayList of transaction
     //
 
 
@@ -65,7 +65,7 @@ public class Miner extends Node {
 
         return b;
     }
-    public  void  addToBlockchain(boolean isfirst , Block block){
+    public  void  addToBlockchain(boolean isfirst , Block block) throws IOException {
 
         System.out.println("ADD  to BLOCKCHAIN " + block.getNonce());
 
@@ -184,26 +184,40 @@ public class Miner extends Node {
                     //System.out.println(pendingBlocks.size());
                     if(blockHashValue.equals(b.getPreviousBlockHash()) && j != listSize - 1){
                         System.out.println("L2et el prev block bs feh collision");
-                        ArrayList<Block> collisionList = new ArrayList<Block>();
-                        for(int z = 0 ; z <= j ; z++){
-                            collisionList.add(pendingBlocks.get(i).get(z));
-                        }
-                        // add block Entities.transaction to this branch
-                        Map<String,JSONObject>  temp1= new HashMap(branches_transactions.get(i));
 
-                        for(int k=0; k<b.getTransactions().size();k++){
-                            temp1.put(b.getTransactions().get(k).get("hash").toString(),b.getTransactions().get(k));
+                        // check if block has duplicates
+                        boolean isDuplicateBlock = false;
+                        for(int p=0;p< pendingBlocks.size();p++){
+                            if(pendingBlocks.get(p).size()>j+1 && pendingBlocks.get(p).get(j+1).getBlockHash().equals(b.getBlockHash())){
+                                isDuplicateBlock = true;
+                                break;
+                            }
                         }
+                        System.out.println("IS DUPLICATE BLOCK :" +isDuplicateBlock);
 
-                        branches_transactions.add(temp1);
-                        collisionList.add(b);
-                        if(collisionList.size() > maxLength) {
-                            maxLength = collisionList.size();
-                            maxIndex = pendingBlocks.size();
+                        if(!isDuplicateBlock) {
+
+                            ArrayList<Block> collisionList = new ArrayList<Block>();
+                            for (int z = 0; z <= j; z++) {
+                                collisionList.add(pendingBlocks.get(i).get(z));
+                            }
+                            // add block transaction to this branch
+                            Map<String, JSONObject> temp1 = new HashMap(branches_transactions.get(i));
+
+                            for (int k = 0; k < b.getTransactions().size(); k++) {
+                                temp1.put(b.getTransactions().get(k).get("hash").toString(), b.getTransactions().get(k));
+                            }
+
+                            branches_transactions.add(temp1);
+                            collisionList.add(b);
+                            if (collisionList.size() > maxLength) {
+                                maxLength = collisionList.size();
+                                maxIndex = pendingBlocks.size();
+                            }
+                            pendingBlocks.add(collisionList);
+                            chooseBlockToMineOnTopOfIt();
+                            newBlockArrived = true;
                         }
-                        pendingBlocks.add(collisionList);
-                        chooseBlockToMineOnTopOfIt();
-                        newBlockArrived = true;
                         break;
                     }else if(blockHashValue.equals(b.getPreviousBlockHash()) && j == listSize - 1){
                         System.out.println("L2et el prev block w 7azwdha fl list");
@@ -288,4 +302,3 @@ public class Miner extends Node {
 
 
 }
-

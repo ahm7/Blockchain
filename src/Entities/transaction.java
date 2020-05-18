@@ -3,11 +3,9 @@ package Entities;
 import java.security.*;
 import java.util.ArrayList;
 import Helper.*;
-
-
-import Entities.input;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+
 
 public class transaction {
 
@@ -21,7 +19,7 @@ public class transaction {
 
     public void setHash() {
         SHA256 hasher = new SHA256();
-         String hash = hasher.generateHash(this.transactionObject.toString());
+        String hash = hasher.generateHash(this.transactionObject.toString());
         transactionObject.put("hash",hash);
     }
 
@@ -124,7 +122,6 @@ public class transaction {
     }
 
     public String getPrevHash_outputindex(JSONObject transaction){
-        System.out.println(transaction);
         JSONArray inputs = (JSONArray) transaction.get("inputs");
         JSONObject input = (JSONObject) inputs.get(0);
         String prevHash  = input.get("prevTxHash").toString();

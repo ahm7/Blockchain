@@ -6,22 +6,28 @@ import java.io.*;
 import java.util.Scanner; // Import the Scanner class to read text files
 import java.util.ArrayList;
 
+import java.io.*;
+import java.util.Scanner; // Import the Scanner class to read text files
+import java.util.ArrayList;
+
 public class parsing {
 
 
-    public ArrayList<TransactionFromText> readDataset(){
+    public ArrayList<TransactionFromText> readDataset(String path){
         try {
             ArrayList<TransactionFromText> transactions = new ArrayList<>();
-            File myObj = new File("testFiles/testAll.txt");
+            File myObj = new File(path);
             Scanner myReader = new Scanner(myObj);
             int printIndex = 0;
             while (myReader.hasNextLine()) {
+
                 String data = myReader.nextLine();
+                System.out.println(data);
                 String[] parsedTransaction = parseString(data,"\\s+");
-                if(printIndex == 0 || data.equals("41226")){
+                /*if(printIndex == 0 || data.equals("41226")){
                     printIndex++;
                     continue;
-                }
+                }*/
                 InputsFromText inputs = new InputsFromText();
                 ArrayList<OutputsFromText> outputs = new ArrayList<>();
                 for(int i = 0;i < parsedTransaction.length;i++){
@@ -49,13 +55,11 @@ public class parsing {
                         }
                     }
                 }
-                if (printIndex != 0){
-                    TransactionFromText transaction = new TransactionFromText();
-                    transaction.setInputs(inputs);
-                    transaction.setOutputs(outputs);
-                    transactions.add(transaction);
+                TransactionFromText transaction = new TransactionFromText();
+                transaction.setInputs(inputs);
+                transaction.setOutputs(outputs);
+                transactions.add(transaction);
 
-                }
                 printIndex++;
             }
             myReader.close();
@@ -69,7 +73,13 @@ public class parsing {
 
     public ArrayList<NodePeers> readNodePeers(int nodeNumber) throws FileNotFoundException {
         String path;
-        path = "NodesPeers/Node" + nodeNumber + "Peers.txt";
+
+        if(nodeNumber == -1){
+
+            path = "NodesPeers/MinersIPs.txt";
+        }else {
+            path = "NodesPeers/Node" + nodeNumber + "Peers.txt";
+        }
         File myObj = new File(path);
         Scanner myReader = new Scanner(myObj);
         ArrayList<NodePeers> nodePeers = new ArrayList<>();
@@ -155,14 +165,14 @@ public class parsing {
 
     public void createFile(int nodeNumber) throws IOException {
         String path;
-        path = "TestFiles/Node" + nodeNumber + "Transactions.txt";
+        path = "TestFiles\\Node" + nodeNumber + "Transactions.txt";
         File myObj = new File(path);
         myObj.createNewFile();
     }
 
     public void createSortedFile(int nodeNumber) throws IOException {
         String path;
-        path = "TestFiles/Node" + nodeNumber + "SortedTransactions.txt";
+        path = "TestFiles\\Node" + nodeNumber + "SortedTransactions.txt";
         File myObj = new File(path);
         myObj.createNewFile();
     }

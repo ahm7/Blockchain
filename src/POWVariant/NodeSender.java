@@ -24,8 +24,6 @@ public class NodeSender extends Thread{
 
             }
 
-
-
         }catch (Exception e){
             System.out.println("Ana 3mlt error ");
         }

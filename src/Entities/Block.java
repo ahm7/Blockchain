@@ -59,7 +59,7 @@ public class Block implements Serializable{
     public void setMerkleTreeRoot(String merkleTreeRoot) {
         this.MerkleTreeRoot = merkleTreeRoot;
     }
-    
+
     public void generateBlockHash() {
         if(!checkLength()) return;
         int transactionsLength = transactions.size();
@@ -76,7 +76,7 @@ public class Block implements Serializable{
         for(int i = 0; i < depth; i++) {
             for(int j = 0; j < transactionsLength; j+=2) {
                 nextArray.add(
-                    hasher.generateHash(currArray.get(j) + currArray.get(j+1))
+                        hasher.generateHash(currArray.get(j) + currArray.get(j+1))
                 );
             }
             currArray = nextArray;
@@ -89,7 +89,7 @@ public class Block implements Serializable{
 
 
     private Boolean checkLength() {
-       return log2(transactions.size()) % 1 == 0 || log2(transactions.size() + 1) % 1 == 0;
+        return log2(transactions.size()) % 1 == 0 || log2(transactions.size() + 1) % 1 == 0;
     }
 
     private double log2(int N) {
@@ -118,8 +118,21 @@ public class Block implements Serializable{
             }
         }
 
-           return false;
+        return false;
     }
 
+    public String getBlockHash(){
+
+        String blockHashValuee = "";
+        blockHashValuee += this.getPreviousBlockHash();
+        blockHashValuee += this.getMerkleTreeRoot();
+        blockHashValuee += this.getTimestamp();
+        blockHashValuee += this.getNonce();
+        SHA256 hash = new SHA256();
+        blockHashValuee = hash.generateHash(blockHashValuee);
+
+
+        return  blockHashValuee;
+    }
 
 }
