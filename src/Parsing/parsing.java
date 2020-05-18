@@ -22,7 +22,6 @@ public class parsing {
             while (myReader.hasNextLine()) {
 
                 String data = myReader.nextLine();
-                System.out.println(data);
                 String[] parsedTransaction = parseString(data,"\\s+");
                 /*if(printIndex == 0 || data.equals("41226")){
                     printIndex++;

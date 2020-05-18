@@ -65,7 +65,7 @@ public class Miner extends Node {
 
         return b;
     }
-    public  void  addToBlockchain(boolean isfirst , Block block) throws IOException {
+    public  void  addToBlockchain(boolean isfirst , Block block) throws IOException, InterruptedException {
 
         System.out.println("ADD  to BLOCKCHAIN " + block.getNonce());
 
@@ -86,6 +86,7 @@ public class Miner extends Node {
             if(!isfirst){
                 update_UTXO(transactions.get(i));
             }
+
             add_UTXO(transactions.get(i));
         }
 
@@ -120,7 +121,7 @@ public class Miner extends Node {
     }
 
 
-    public void validateBlock(Block b) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
+    public void validateBlock(Block b) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, InterruptedException {
         System.out.println("Enter validate block");
         System.out.println("Pneding block size : " + pendingBlocks.size());
         System.out.println("prev block hash " + b.getPreviousBlockHash());

@@ -32,7 +32,7 @@ import org.json.simple.parser.ParseException;
 
 public class main {
 
-     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException, InvalidKeySpecException, URISyntaxException, NoSuchProviderException {
+     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException, InvalidKeySpecException, URISyntaxException, NoSuchProviderException, InterruptedException {
          Timestamp timestamp = new Timestamp(System.currentTimeMillis());
          int nodeNumber = Integer.parseInt(args[0]);
          parsing p = new parsing();
@@ -60,52 +60,41 @@ public class main {
          n.setTrasactions(transactions);
 
          ///
-         ArrayList<Block> blocks  = new ArrayList<Block>();
          int k =0;
          String blockHashValue1 = "";
          Timestamp time = new Timestamp(50);
 
-         String [] blockHashes = new String[7];
-         for(int i=0;i<7;i++){
-             ArrayList<JSONObject> transaction = new ArrayList<JSONObject>();
-             transaction.add(transactions.get(k));
-             k++;
-             transaction.add(transactions.get(k));
-             k++;
-             Block b0 = new Block();
+         // create first block in the chain in each Node
+         ArrayList<JSONObject> transactions2 = new ArrayList<>();
+         path = "testFiles/Node0Transactions.txt";
+         transactions2 = constructTransactions(path, 0);
+         System.out.println("fisrt transactions");
+         System.out.println(transactions2.get(0));
+         System.out.println(transactions2.get(1));
+         Block b0 = new Block();
+         b0.setNonce(0);
+         b0.setTransactions(transactions2);
+         b0.generateBlockHash();
+         b0.setTimestamp(time);
+         b0.setPreviousBlockHash(blockHashValue1);
+         blockHashValue1 = "";
 
-             b0.setNonce(i);
-             b0.setTransactions(transaction);
-             b0.generateBlockHash();
-             b0.setTimestamp(time);
-             b0.setPreviousBlockHash(blockHashValue1);
-             blockHashValue1 = "";
-             if(i!=0 && i%3 ==0){
-                 b0.setPreviousBlockHash(blockHashes[i-2]);
-             }
-             blockHashValue1 += b0.getPreviousBlockHash();
-             blockHashValue1 += b0.getMerkleTreeRoot();
-             blockHashValue1 += b0.getTimestamp();
-             blockHashValue1 += b0.getNonce();
-             SHA256 hash = new SHA256();
-             blockHashValue1 = hash.generateHash(blockHashValue1);
-             blockHashes[i]=blockHashValue1;
-             System.out.println(i + " EL hash bt3ha  : " + blockHashValue1);
-             System.out.println(i + " EL prev hash bt3ha  : " + b0.getPreviousBlockHash());
+         blockHashValue1 += b0.getPreviousBlockHash();
+         blockHashValue1 += b0.getMerkleTreeRoot();
+         blockHashValue1 += b0.getTimestamp();
+         blockHashValue1 += b0.getNonce();
+         SHA256 hash = new SHA256();
+         blockHashValue1 = hash.generateHash(blockHashValue1);
+         System.out.println(" EL hash bt3 awl block   : " + blockHashValue1);
+         n.addToBlockchain(true,b0);
 
-             blocks.add(b0);
-         }
-
-         n.addToBlockchain(true,blocks.get(0));
-         n.addToBlockchain(true,blocks.get(1));
-         n.addToBlockchain(true,blocks.get(2));
-         if(port == 4000){
+       /*  if(port == 4000){
              //n.validateBlock(blocks.get(3));
              //n.validateBlock(blocks.get(4));
              //n.validateBlock(blocks.get(5));
              //n.validateBlock(blocks.get(6));
          }
-         if(port == 4002) {
+       */ /* if(port == 4002) {
              PeerToPeer conn = new PeerToPeer();
 
              conn.broadcastTx(transactions.get(6), nodeNumber);
@@ -127,7 +116,7 @@ public class main {
              System.out.println(transactions.get(12).get("hash"));
              conn.broadcastTx(transactions.get(13), nodeNumber);
              System.out.println(transactions.get(13).get("hash"));
-         }
+         }*/
          /*
          Timestamp timestamp = new Timestamp(System.currentTimeMillis());
          int nodeNumber = Integer.parseInt(args[0]);
@@ -697,9 +686,7 @@ public class main {
         SHA256 hasher = new SHA256();
         parsing parse = new parsing();
         ArrayList<TransactionFromText> transaction_parse = parse.readDataset(path);
-        System.out.println(transaction_parse.get(0));
-        System.out.println(transaction_parse.get(1));
-        System.out.println("traparse"+" "+ transaction_parse.size());
+
 
         Map<Integer,String> map_txNum_to_hash = new HashMap<Integer,String>();
         String hash_temp = hasher.generateHash("temp");
@@ -714,7 +701,8 @@ public class main {
             Scanner myReader = new Scanner(myObj);
             int k=1;
             while (myReader.hasNextLine()) {
-                map_txNum_to_hash.put(k,myReader.nextLine());
+                String f = myReader.nextLine();
+                map_txNum_to_hash.put(k,f);
                 k++;
             }
             myReader.close();
@@ -744,7 +732,6 @@ public class main {
         ArrayList<JSONObject> transactions_objects = new ArrayList<JSONObject>();
         for(int i=0;i<transaction_parse.size();i++){
 
-            System.out.println(i);
             ArrayList<OutputsFromText>  outputs_parse = transaction_parse.get(i).getOutputs();
             InputsFromText input_parse    =  transaction_parse.get(i).getInputs();
 
@@ -755,7 +742,8 @@ public class main {
             transaction.setInputCounter(1);
 
             String prev_hash = map_txNum_to_hash.get(input_parse.getPreviousTX());
-            System.out.println(prev_hash);
+            if(input_parse.getPreviousTX() == 1 || input_parse.getPreviousTX() == 2 ){
+            }
             input  input = new input(prev_hash,input_parse.getOutputIndex());
             ArrayList<input> inputs  = new ArrayList<input>();
             inputs.add(input);

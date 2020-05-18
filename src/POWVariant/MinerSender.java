@@ -60,11 +60,13 @@ public class MinerSender extends Thread{
 
         } catch (InvalidKeyException | IOException e) {
 
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
     }
 
-    private void recieveTransactionHandling(boolean isnewTransaction) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    private void recieveTransactionHandling(boolean isnewTransaction) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, InterruptedException {
 
 
         if(m.branchChanged){

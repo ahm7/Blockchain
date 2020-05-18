@@ -57,7 +57,6 @@ public class Node {
             JSONArray inputs  = (JSONArray) Node_transaction.get(i).get("inputs");
             for (Object o : inputs) {
                 JSONObject jsonLineItem = (JSONObject) o;
-                System.out.println(Node_transaction.get(i));
                 String prevTxHash = jsonLineItem.get("prevTxHash").toString();
                 waited_transactions.put(prevTxHash,Node_transaction.get(i));
             }
@@ -95,7 +94,7 @@ public class Node {
     }
 
 
-    public void validateBlock(Block b) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
+    public void validateBlock(Block b) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, InterruptedException {
         System.out.println(" ENTER VALIDATE BLOCK ");
         ArrayList<JSONObject> blockTransaction = b.getTransactions();
         String blockHashValuee = "";
@@ -315,8 +314,8 @@ public class Node {
         //System.out.println(transaction);
         JSONObject t = new JSONObject();
         UTXO_list.put(hash,transaction);
-
         if(waited_transactions.containsKey(hash)){
+
             issueTransaction(waited_transactions.get(hash));
         }
     }
@@ -404,7 +403,7 @@ public class Node {
 
     }
 
-    public  void  addToBlockchain(boolean isfirst , Block block) throws IOException {
+    public  void  addToBlockchain(boolean isfirst , Block block) throws IOException, InterruptedException {
 
         blockChain.add(block);
         System.out.println("ADD TO BLOCK CHAIN");
