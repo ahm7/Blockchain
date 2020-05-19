@@ -3,8 +3,13 @@ package POWVariant;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -36,7 +41,7 @@ public class Node {
     int maxLength = 0;
     int maxIndex = 0;
     public ArrayList<ArrayList<Block>> pendingBlocks = new ArrayList<ArrayList<Block>>();
-
+    public  ArrayList<JSONObject> issueTransactions = new ArrayList<>();
     Lock lock = new ReentrantLock();
     int portNum = -1;
 
@@ -94,7 +99,7 @@ public class Node {
     }
 
 
-    public void validateBlock(Block b) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, InterruptedException {
+    public void validateBlock(Block b) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, InterruptedException, InvalidKeySpecException {
         System.out.println(" ENTER VALIDATE BLOCK ");
         ArrayList<JSONObject> blockTransaction = b.getTransactions();
         String blockHashValuee = "";
@@ -231,6 +236,7 @@ public class Node {
             }
 
         }
+        System.out.println("block chain size : " + blockChain.size());
         System.out.println("PENDING BLOCKS");
         for(int i = 0; i < pendingBlocks.size() ; i++){
             for(int j = 0 ; j < pendingBlocks.get(i).size() ; j++){
@@ -294,15 +300,14 @@ public class Node {
 
 
     }
-    public  void add_UTXO(JSONObject transaction) throws IOException {
+    public  void add_UTXO(JSONObject transaction) throws IOException, InterruptedException {
 
         System.out.println(" ENTER ADD TO UTXO ");
         String hash = transaction.get("hash").toString();
         int outputCounter = (int)transaction.get("outputCounter");
         JSONObject output_indexes = new JSONObject();
         output_indexes.put("usedOutputcounter",outputCounter);
-        System.out.println("output counter :"+outputCounter);
-        System.out.println("hash : " +hash);
+
 
 
         for(int i=0;i<outputCounter;i++){
@@ -316,16 +321,18 @@ public class Node {
         UTXO_list.put(hash,transaction);
         if(waited_transactions.containsKey(hash)){
 
-            issueTransaction(waited_transactions.get(hash));
+            System.out.println("found waiting prev " + hash);
+            issueTransactions.add(waited_transactions.get(hash));
         }
     }
 
 
-    public boolean validateTransaction(JSONObject transaction) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public boolean validateTransaction(JSONObject transaction) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException, IOException {
 
         System.out.println(" ENTER VALIDATE TRANSACTION");
 
         boolean IS_UTXO = isUnSpend(transaction);
+        System.out.println("is un spend :" + IS_UTXO);
         //System.out.println("IS UTXO : " + IS_UTXO );
 
         boolean singnatur_is_right = false ;
@@ -334,9 +341,10 @@ public class Node {
             //System.out.println("singnatur_is_right : " + singnatur_is_right );
 
         }
+        System.out.println("is signature right:" + singnatur_is_right);
         //boolean value_is_valid = validValue(transaction);
 
-        return  singnatur_is_right & IS_UTXO ;
+        return singnatur_is_right ;
     }
 
     private boolean validValue(JSONObject transaction) {
@@ -371,7 +379,7 @@ public class Node {
         return true;
     }
 
-    private boolean validateSignature(JSONObject transaction) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    private boolean validateSignature(JSONObject transaction) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, InvalidKeySpecException, IOException {
 
         System.out.println("ENTER VALIDATE SIGNATURE ");
         JSONArray inputs  = (JSONArray) transaction.get("inputs");
@@ -379,11 +387,13 @@ public class Node {
         for (Object o : inputs) {
             JSONObject jsonLineItem = (JSONObject) o;
             String prevTxHash = jsonLineItem.get("prevTxHash").toString();
+
             int  outputIndex = (int)jsonLineItem.get("outputIndex");
             JSONArray prevTxOutputs  = (JSONArray) UTXO_list.get(prevTxHash).get("outputs");
 
             JSONObject output =(JSONObject) prevTxOutputs.get(outputIndex-1);
             PublicKey publicKey = (PublicKey) output.get("publicKey");
+
 
             Signature sig = Signature.getInstance("SHA256withRSA");
             sig.initVerify(publicKey);
@@ -419,14 +429,19 @@ public class Node {
             add_UTXO(transactions.get(i));
         }
 
+        for(int i=0;i<issueTransactions.size();i++){
+            issueTransaction(issueTransactions.get(i));
+
+        }
+
 
     }
 
-    public void issueTransaction(JSONObject jsonObject) throws IOException {
+    public void issueTransaction(JSONObject jsonObject) throws IOException, InterruptedException {
 
         PeerToPeer conn = new PeerToPeer();
         conn.broadcastTx(jsonObject,-1);
-    }
 
+    }
 
 }

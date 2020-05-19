@@ -33,44 +33,29 @@ import org.json.simple.parser.ParseException;
 public class main {
 
      public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, ClassNotFoundException, ParseException, InvalidKeySpecException, URISyntaxException, NoSuchProviderException, InterruptedException {
+
+         ArrayList<JSONObject> test = constructTransactions("testFiles/Node0Transactions.txt",0);
+         System.out.println(test.size());
+         System.out.println(test.get(0).get("hash"));
+
+
          Timestamp timestamp = new Timestamp(System.currentTimeMillis());
          int nodeNumber = Integer.parseInt(args[0]);
          parsing p = new parsing();
          NodePeers node = p.readPort(nodeNumber);
          int port = node.getPort();
 
-         // set transaction
-         String  path = "testFiles/Node"+nodeNumber+"Transactions.txt";
-         // String path = "testFiles/txdataset_v2.txt";
-         ArrayList<JSONObject> transactions = new ArrayList<>();
-         transactions = constructTransactions(path, nodeNumber);
 
-         System.out.println("end reading ");
-         System.out.println(transactions.size());
+         // add to block chain first
 
-         //Miner n = new Miner(port,nodeNumber);
-
-         Node n;
-         if(port == 4000 || port == 4001){
-             n = new Miner(port,nodeNumber);
-         }else{
-             n = new Node(port,nodeNumber);
-         }
-         n.initializeServer();
-         n.setTrasactions(transactions);
-
-         ///
-         int k =0;
          String blockHashValue1 = "";
          Timestamp time = new Timestamp(50);
 
          // create first block in the chain in each Node
          ArrayList<JSONObject> transactions2 = new ArrayList<>();
-         path = "testFiles/Node0Transactions.txt";
-         transactions2 = constructTransactions(path, 0);
-         System.out.println("fisrt transactions");
-         System.out.println(transactions2.get(0));
-         System.out.println(transactions2.get(1));
+          String path1 = "testFiles/Node0Transactions.txt";
+         transactions2 = constructTransactions(path1, 0);
+
          Block b0 = new Block();
          b0.setNonce(0);
          b0.setTransactions(transactions2);
@@ -86,7 +71,36 @@ public class main {
          SHA256 hash = new SHA256();
          blockHashValue1 = hash.generateHash(blockHashValue1);
          System.out.println(" EL hash bt3 awl block   : " + blockHashValue1);
+
+
+         // end adding to block chain
+
+         // set transaction
+         String  path = "testFiles/Node"+nodeNumber+"SortedTransactions.txt";
+         // String path = "testFiles/txdataset_v2.txt";
+         ArrayList<JSONObject> transactions = new ArrayList<>();
+         transactions = constructTransactions(path, nodeNumber);
+
+         System.out.println("end reading ");
+         System.out.println(transactions.size());
+
+         //Miner n = new Miner(port,nodeNumber);
+
+         Node n;
+         if(port == 4004 || port == 4005){
+             n = new Miner(port,nodeNumber);
+         }else{
+             n = new Node(port,nodeNumber);
+         }
+         n.initializeServer();
+         n.setTrasactions(transactions);
          n.addToBlockchain(true,b0);
+
+
+         ///
+         int k =0;
+
+
 
        /*  if(port == 4000){
              //n.validateBlock(blocks.get(3));
@@ -604,7 +618,7 @@ public class main {
          */
         //testSortFile();
     }
-    public static void testConnection() throws IOException {
+    public static void testConnection() throws IOException, InterruptedException {
         PeerToPeer conn = new PeerToPeer();
         Block dummy = new Block();
         dummy.setMerkleTreeRoot("Hello 4000");
@@ -682,6 +696,49 @@ public class main {
 
     }
 
+    public  static void buildTransactions(){
+        parsing parse = new parsing();
+        ArrayList<TransactionFromText> transaction_parse = parse.readDataset("testFiles/testAll.txt");
+
+        int [] file_input =  new int[3] ;
+        int  previoustx = 0;
+        double [] value1 = new double[3];
+        int [] output1 = new int[3] ;
+        double []value2 = new double[3];
+        int [] output2 = new int[3] ;
+        double [] value3 = new double[3];
+        int [] output3 = new int[3] ;
+
+
+        int starting_tx_num = 247;
+        for(int i=0;i<transaction_parse.size();i++){
+
+            ArrayList<OutputsFromText>  outputs_parse = transaction_parse.get(i).getOutputs();
+            InputsFromText input_parse    =  transaction_parse.get(i).getInputs();
+
+            previoustx = 85+i;
+
+
+            for(int j=0;j<outputs_parse.size();j++){
+                double bigValue = outputs_parse.get(j).getValue();
+                file_input[j] = outputs_parse.get(j).getOutput();
+                value1[j]  = bigValue / 3 ;
+                value2[j]  = bigValue /3 ;
+                value3[j]  = bigValue / 3 ;
+                output1[j] = (file_input[j] + 1 )% 5 +1 ;
+                output2[j] = (file_input[j] + 2 )% 5 +1;
+                output3[j] = file_input[j];
+               String tx1 =""+starting_tx_num+ " input:"+ file_input[j] + " previoustx:"+previoustx +" outputindex:"+ (j+1)+" value1:"+value1[j]+" output1:"+output1[j]+" value2:"+value2[j]+" output2:"+output2[j]+" value3:"+value3[j]+" output3:"+output3[j] ;
+                starting_tx_num ++;
+                System.out.println(tx1);
+
+            }
+
+        }
+
+
+
+    }
     public  static  ArrayList<JSONObject>  constructTransactions(String path,int NodeNum) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, IOException, InvalidKeySpecException {
         SHA256 hasher = new SHA256();
         parsing parse = new parsing();
@@ -693,8 +750,8 @@ public class main {
         map_txNum_to_hash.put(-1,hash_temp);
         // initialize 50 nodes
 
-        PrivateKey  privateKey = null;
-        PublicKey  publicKeys [] = new PublicKey[50];
+        PrivateKey  privateKeys [] = new PrivateKey[7];
+        PublicKey  publicKeys [] = new PublicKey[7];
 
         try {
             File myObj = new File("transaction_hash.txt");
@@ -711,7 +768,7 @@ public class main {
             e.printStackTrace();
         }
 
-        for(int i=0;i<50;i++){
+        for(int i=0;i<7;i++){
 
             InputStream inputStream = new FileInputStream("testFiles/keys"+i+"c"+".txt");
             long fileSize = new File("testFiles/keys"+i+"c"+".txt").length();
@@ -719,31 +776,36 @@ public class main {
             inputStream.read(allBytes);
             KeyFactory kf = KeyFactory.getInstance("RSA"); // or "EC" or whatever
             publicKeys[i] = kf.generatePublic(new X509EncodedKeySpec(allBytes));
+
+
+            inputStream = new FileInputStream("testFiles/keys"+i+"p"+".txt");
+            fileSize = new File("testFiles/keys"+i+"p"+".txt").length();
+            allBytes = new byte[(int) fileSize];
+            inputStream.read(allBytes);
+            KeyFactory kf1 = KeyFactory.getInstance("RSA"); // or "EC" or whatever
+            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(allBytes);
+            privateKeys[i] = kf1.generatePrivate(spec);
+
         }
-        InputStream inputStream = new FileInputStream("testFiles/keys"+NodeNum+"p"+".txt");
-        long fileSize = new File("testFiles/keys"+NodeNum+"p"+".txt").length();
-        byte[]  allBytes = new byte[(int) fileSize];
-        inputStream.read(allBytes);
-        KeyFactory kf1 = KeyFactory.getInstance("RSA"); // or "EC" or whatever
-        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(allBytes);
-        privateKey = kf1.generatePrivate(spec);
 
 
         ArrayList<JSONObject> transactions_objects = new ArrayList<JSONObject>();
+        //FileWriter fw = new FileWriter("transaction_hash.txt");
+
         for(int i=0;i<transaction_parse.size();i++){
 
             ArrayList<OutputsFromText>  outputs_parse = transaction_parse.get(i).getOutputs();
             InputsFromText input_parse    =  transaction_parse.get(i).getInputs();
 
             PublicKey publicKey = publicKeys[input_parse.getInput()];
+            PrivateKey privateKey = privateKeys[input_parse.getInput()];
 
             transaction transaction = new transaction();
 
             transaction.setInputCounter(1);
 
             String prev_hash = map_txNum_to_hash.get(input_parse.getPreviousTX());
-            if(input_parse.getPreviousTX() == 1 || input_parse.getPreviousTX() == 2 ){
-            }
+
             input  input = new input(prev_hash,input_parse.getOutputIndex());
             ArrayList<input> inputs  = new ArrayList<input>();
             inputs.add(input);
@@ -764,18 +826,29 @@ public class main {
             transaction.setOutputs(outputs);
 
             transaction.setHash();
-            transaction.setSignature(privateKey);
+            transaction.setSignature(privateKeys[input_parse.getInput()]);
 
-            //System.out.println(transaction.getTransactionObject().get("hash"));
-            ///map_txNum_to_hash.put(i+1,transaction.getTransactionObject().get("hash").toString());
+            //map_txNum_to_hash.put(i+1,transaction.getTransactionObject().get("hash").toString());
+            //fw.write(transaction.getTransactionObject().get("hash").toString()+"\n");
 
             JSONObject test =  transaction.getTransactionObject();
+
+            /*if(test.get("hash").toString().equals("b934bd7bd10834c90984cb0a3168175073f94607531b0f25b15b939807025985")){
+                System.out.println("found : ");
+                System.out.println(test.get("signature"));
+                System.out.println(publicKey);
+
+            }*/
+
+
+
             // System.out.println(test);
 
 
             transactions_objects.add(test);
 
         }
+        //fw.close();
         return transactions_objects;
     }
 

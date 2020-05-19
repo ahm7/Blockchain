@@ -45,10 +45,12 @@ public class MinerBFTSender extends Thread {
 
         } catch (InvalidKeyException | IOException e) {
 
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
-    private void recieveTransactionHandling(boolean isnewTransaction) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    private void recieveTransactionHandling(boolean isnewTransaction) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, InterruptedException {
         JSONObject tx = (JSONObject) b;
         boolean valid_trans = m.validateTransaction(tx);
         System.out.println("TRANSACTION VALIDATION CHECK " + valid_trans);

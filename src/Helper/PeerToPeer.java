@@ -19,7 +19,7 @@ public class PeerToPeer {
         return ss;
     }
 
-    public void sendBlock(String peerIP, int portNum,Block b) throws IOException {
+    public void sendBlock(String peerIP, int portNum,Block b) throws IOException, InterruptedException {
         try{
             Socket socket = new Socket(peerIP, portNum);
             System.out.println("Connected with "+ peerIP+ "!");
@@ -30,6 +30,16 @@ public class PeerToPeer {
             System.out.println("Connection with "+ peerIP+ " closed !");
             socket.close();
         }catch (Exception e){
+            long t= System.currentTimeMillis();
+            long end = t+15000;
+            while(System.currentTimeMillis() < end) {
+                // do something
+                // pause to avoid churning
+                Thread.sleep( 15 );
+                System.out.println("waiting on sending block ");
+            }
+
+            sendBlock(peerIP,portNum,b);
 
         }
 
@@ -66,12 +76,12 @@ public class PeerToPeer {
             System.out.println("Connection with "+ peerIP+ " closed !");
             socket.close();
         }catch (Exception e){
-
+            sendVote( peerIP,portNum,nodeVote);
         }
 
     }
 
-    public void sendtx(String peerIP, int portNum,JSONObject tx) throws IOException {
+    public void sendtx(String peerIP, int portNum,JSONObject tx) throws IOException, InterruptedException {
         try{
             Socket socket = new Socket(peerIP, portNum);
             System.out.println("Connected with "+ peerIP+ "!");
@@ -82,6 +92,15 @@ public class PeerToPeer {
             System.out.println("Connection with "+ peerIP+ " closed !");
             socket.close();
         }catch(Exception e){
+            long t= System.currentTimeMillis();
+            long end = t+15000;
+            while(System.currentTimeMillis() < end) {
+                // do something
+                // pause to avoid churning
+                Thread.sleep( 15 );
+                System.out.println("waiting on sending tx");
+            }
+            sendtx( peerIP,portNum,tx);
 
         }
 
@@ -108,7 +127,7 @@ public class PeerToPeer {
         }
     }
 
-    public void broadcastTx(JSONObject tx , int nodeNumber) throws IOException {
+    public void broadcastTx(JSONObject tx , int nodeNumber) throws IOException, InterruptedException {
         parsing p = new parsing();
         ArrayList<NodePeers> peers = p.readNodePeers(nodeNumber);
 
@@ -119,7 +138,7 @@ public class PeerToPeer {
         }
     }
 
-    public void broadcastBlock(Block b, int nodeNumber) throws IOException {
+    public void broadcastBlock(Block b, int nodeNumber) throws IOException, InterruptedException {
         parsing p = new parsing();
         ArrayList<NodePeers> peers = p.readNodePeers(nodeNumber);
         for(int i = 0 ; i < peers.size() ; i++) {

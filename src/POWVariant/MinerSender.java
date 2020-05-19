@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +50,7 @@ public class MinerSender extends Thread{
             }else if(methodType == 3){
                 m.lock.lock();
 
+                System.out.println("enter lock on transaction");
                 recieveTransactionHandling(true);
 
                 m.lock.unlock();
@@ -62,11 +64,13 @@ public class MinerSender extends Thread{
 
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
         }
 
     }
 
-    private void recieveTransactionHandling(boolean isnewTransaction) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, InterruptedException {
+    private void recieveTransactionHandling(boolean isnewTransaction) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, InterruptedException, InvalidKeySpecException {
 
 
         if(m.branchChanged){
@@ -112,6 +116,7 @@ public class MinerSender extends Thread{
         else {
             valid_trans = true;}
 
+
         if(valid_trans){
             if(isnewTransaction) {
                 boolean double_spend = false;
@@ -146,7 +151,7 @@ public class MinerSender extends Thread{
                     //System.out.println("m.branches_transactions.size() : " + m.branches_transactions.size() );
                     if (m.branches_transactions.size() > 0 && m.branches_transactions.get(m.choosed_branch).containsKey(hash)) {
 
-
+                        System.out.println("already exist transaction");
                     } else {
                         m.pending_transactions.put(hash, tx);
                     }
@@ -156,6 +161,7 @@ public class MinerSender extends Thread{
                     //System.out.println("prev tx + "  + prev_tx_hash + string_outputIndex);
                 }
 
+                System.out.println("pending transaction size : " + m.pending_transactions.size());
             }else {
                 System.out.println("KDA D5L YSHOF EL TRANSACTIONS EL ATB2T");
                 System.out.println("pending list size : " + m.pending_transactions.size());

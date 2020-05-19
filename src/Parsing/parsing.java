@@ -35,7 +35,7 @@ public class parsing {
                     }
                     else{
                         String[] parsedAttribute = parseString(parsedTransaction[i], ":");
-                        if(parsedAttribute[0].equals("intput")){
+                        if(parsedAttribute[0].equals("input")){
                             inputs.setInput(Integer.parseInt(parsedAttribute[1]));
                         }
                         else if(parsedAttribute[0].equals("previoustx")){

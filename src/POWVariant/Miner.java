@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +22,7 @@ public class Miner extends Node {
     public Map<String,JSONObject> all_valid_transactions  = new HashMap<String,JSONObject>();
     public Map<String,Integer> all_invalid_prevtransactions  = new HashMap<String,Integer>();
     ArrayList<Map<String,JSONObject>> branches_transactions = new ArrayList<Map<String,JSONObject>>();
-    public  int blockSize = 2;
+    public  int blockSize = 5;
     public int choosed_branch = 0;
     boolean branchChanged = false;
     boolean newBlockArrived = false;
@@ -93,6 +94,12 @@ public class Miner extends Node {
 
     }
 
+    public void issueTransaction(JSONObject jsonObject) throws IOException, InterruptedException {
+
+        PeerToPeer conn = new PeerToPeer();
+        conn.broadcastTx(jsonObject,-1);
+
+    }
 
 
     public int  chooseBlockToMineOnTopOfIt(){
@@ -121,7 +128,7 @@ public class Miner extends Node {
     }
 
 
-    public void validateBlock(Block b) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, InterruptedException {
+    public void validateBlock(Block b) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, InterruptedException, InvalidKeySpecException {
         System.out.println("Enter validate block");
         System.out.println("Pneding block size : " + pendingBlocks.size());
         System.out.println("prev block hash " + b.getPreviousBlockHash());
@@ -149,8 +156,7 @@ public class Miner extends Node {
         System.out.println("is transactions valid  : " + valid);
         //System.out.println("Valid  ? : "+valid);
         if(valid){
-            PeerToPeer conn = new PeerToPeer();
-            conn.broadcastBlock(b,nodeNumber);
+
             if(pendingBlocks.size() == 0){
                 ArrayList<Block> temp = new ArrayList<Block>();
                 Map<String,JSONObject>  temp1= new HashMap<String,JSONObject>();
@@ -165,82 +171,124 @@ public class Miner extends Node {
                 newBlockArrived = true;
                 maxLength = 1;
                 maxIndex = 0;
+                PeerToPeer conn = new PeerToPeer();
+                conn.broadcastBlock(b,nodeNumber);
+            }else {
+                int size = pendingBlocks.size();
+                boolean found_place = false;
+                for (int i = 0; i < size; i++) {
+                    int listSize = pendingBlocks.get(i).size();
+                    System.out.println("EL list rqm " + i + " El size bt3ha : " + listSize);
+                    for (int j = 0; j < listSize; j++) {
+                        Block temp = pendingBlocks.get(i).get(j);
+                        String blockHashValue = "";
+                        blockHashValue += temp.getPreviousBlockHash();
+                        blockHashValue += temp.getMerkleTreeRoot();
+                        blockHashValue += temp.getTimestamp();
+                        blockHashValue += temp.getNonce();
+                        SHA256 hash = new SHA256();
+                        blockHashValue = hash.generateHash(blockHashValue);
+                        //System.out.println(blockHashValue );
+                        //System.out.println(b.getPreviousBlockHash());
+                        //System.out.println(pendingBlocks.size());
+                        if (blockHashValue.equals(b.getPreviousBlockHash()) && j != listSize - 1) {
+                            found_place = true;
+                            System.out.println("L2et el prev block bs feh collision");
 
-            }
-            int size = pendingBlocks.size();
-            for(int i = 0 ; i < size; i++){
-                int listSize = pendingBlocks.get(i).size();
-                System.out.println("EL list rqm " + i + " El size bt3ha : " + listSize);
-                for(int j = 0 ; j < listSize; j++){
-                    Block temp = pendingBlocks.get(i).get(j);
-                    String blockHashValue = "";
-                    blockHashValue += temp.getPreviousBlockHash();
-                    blockHashValue += temp.getMerkleTreeRoot();
-                    blockHashValue += temp.getTimestamp();
-                    blockHashValue += temp.getNonce();
-                    SHA256 hash = new SHA256();
-                    blockHashValue = hash.generateHash(blockHashValue);
-                    //System.out.println(blockHashValue );
-                    //System.out.println(b.getPreviousBlockHash());
-                    //System.out.println(pendingBlocks.size());
-                    if(blockHashValue.equals(b.getPreviousBlockHash()) && j != listSize - 1){
-                        System.out.println("L2et el prev block bs feh collision");
+                            // check if block has duplicates
+                            boolean isDuplicateBlock = false;
+                            for (int p = 0; p < pendingBlocks.size(); p++) {
+                                if (pendingBlocks.get(p).size() > j + 1 && pendingBlocks.get(p).get(j + 1).getBlockHash().equals(b.getBlockHash())) {
+                                    isDuplicateBlock = true;
+                                    break;
+                                }
+                            }
+                            System.out.println("IS DUPLICATE BLOCK :" + isDuplicateBlock);
 
-                        // check if block has duplicates
+                            if (!isDuplicateBlock) {
+
+                                ArrayList<Block> collisionList = new ArrayList<Block>();
+                                for (int z = 0; z <= j; z++) {
+                                    collisionList.add(pendingBlocks.get(i).get(z));
+                                }
+                                // add block transaction to this branch
+                                Map<String, JSONObject> temp1 = new HashMap(branches_transactions.get(i));
+
+                                for (int k = 0; k < b.getTransactions().size(); k++) {
+                                    temp1.put(b.getTransactions().get(k).get("hash").toString(), b.getTransactions().get(k));
+                                }
+
+                                branches_transactions.add(temp1);
+                                collisionList.add(b);
+                                if (collisionList.size() > maxLength) {
+                                    maxLength = collisionList.size();
+                                    maxIndex = pendingBlocks.size();
+                                }
+                                pendingBlocks.add(collisionList);
+                                chooseBlockToMineOnTopOfIt();
+                                newBlockArrived = true;
+                                PeerToPeer conn = new PeerToPeer();
+                                conn.broadcastBlock(b,nodeNumber);
+                            }
+                            break;
+                        } else if (blockHashValue.equals(b.getPreviousBlockHash()) && j == listSize - 1) {
+                            found_place = true;
+                            System.out.println("L2et el prev block w 7azwdha fl list");
+
+                            pendingBlocks.get(i).add(b);
+                            chooseBlockToMineOnTopOfIt();
+                            newBlockArrived = true;
+
+                            for (int k = 0; k < b.getTransactions().size(); k++) {
+                                branches_transactions.get(i).put(b.getTransactions().get(k).get("hash").toString(), b.getTransactions().get(k));
+                            }
+
+                            if (pendingBlocks.get(i).size() > maxLength) {
+                                maxLength = pendingBlocks.get(i).size();
+                                maxIndex = i;
+                                branchChanged = true;
+                            }
+                            PeerToPeer conn = new PeerToPeer();
+                            conn.broadcastBlock(b,nodeNumber);
+
+                            break;
+                        }
+                    }
+
+                }
+
+                if(!found_place){
+
                         boolean isDuplicateBlock = false;
-                        for(int p=0;p< pendingBlocks.size();p++){
-                            if(pendingBlocks.get(p).size()>j+1 && pendingBlocks.get(p).get(j+1).getBlockHash().equals(b.getBlockHash())){
+                        for (int p = 0; p < pendingBlocks.size(); p++) {
+                            if (pendingBlocks.get(p).size() > 0 && pendingBlocks.get(p).get(0).getBlockHash().equals(b.getBlockHash())) {
                                 isDuplicateBlock = true;
                                 break;
                             }
                         }
-                        System.out.println("IS DUPLICATE BLOCK :" +isDuplicateBlock);
-
-                        if(!isDuplicateBlock) {
-
-                            ArrayList<Block> collisionList = new ArrayList<Block>();
-                            for (int z = 0; z <= j; z++) {
-                                collisionList.add(pendingBlocks.get(i).get(z));
-                            }
-                            // add block transaction to this branch
-                            Map<String, JSONObject> temp1 = new HashMap(branches_transactions.get(i));
-
-                            for (int k = 0; k < b.getTransactions().size(); k++) {
-                                temp1.put(b.getTransactions().get(k).get("hash").toString(), b.getTransactions().get(k));
+                        if (!isDuplicateBlock) {
+                            // this mean this block will start it's own branch and see what will happen
+                            ArrayList<Block> temp1 = new ArrayList<Block>();
+                            Map<String, JSONObject> temp2 = new HashMap<String, JSONObject>();
+                            for (int p = 0; p < b.getTransactions().size(); p++) {
+                                temp2.put(b.getTransactions().get(p).get("hash").toString(), b.getTransactions().get(p));
                             }
 
-                            branches_transactions.add(temp1);
-                            collisionList.add(b);
-                            if (collisionList.size() > maxLength) {
-                                maxLength = collisionList.size();
-                                maxIndex = pendingBlocks.size();
-                            }
-                            pendingBlocks.add(collisionList);
-                            chooseBlockToMineOnTopOfIt();
-                            newBlockArrived = true;
-                        }
-                        break;
-                    }else if(blockHashValue.equals(b.getPreviousBlockHash()) && j == listSize - 1){
-                        System.out.println("L2et el prev block w 7azwdha fl list");
-                        pendingBlocks.get(i).add(b);
-                        chooseBlockToMineOnTopOfIt();
-                        newBlockArrived = true;
-
-                        for(int k=0; k<b.getTransactions().size();k++){
-                            branches_transactions.get(i).put(b.getTransactions().get(k).get("hash").toString(),b.getTransactions().get(k));
+                            branches_transactions.add(temp2);
+                            temp1.add(b);
+                            pendingBlocks.add(temp1);
+                            PeerToPeer conn = new PeerToPeer();
+                            conn.broadcastBlock(b,nodeNumber);
                         }
 
-                        if(pendingBlocks.get(i).size() > maxLength){
-                            maxLength = pendingBlocks.get(i).size();
-                            maxIndex = i;
-                            branchChanged = true ;
-                        }
-                        break;
-                    }
+
+
+
 
                 }
-            }
 
+
+            }
             if(maxLength > 2){
                 Block safeBlock = pendingBlocks.get(maxIndex).get(0);
                 String safeblockHashValue = "";

@@ -42,7 +42,7 @@ public class NodeBFT {
         thread.start();
     }
 
-    public void addToVotes(Vote v) throws SignatureException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void addToVotes(Vote v) throws SignatureException, NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException {
         votesRecieved.add(v);
         System.out.println("Vote For Block " + currentBlock.getPreviousBlockHash() + " " + v.getNodeVote());
         if(votesRecieved.size() == networkSize){
@@ -68,7 +68,7 @@ public class NodeBFT {
         return publicKey;
     }
 
-    public void validateBlock(Block b) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
+    public void validateBlock(Block b) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, InterruptedException {
           // nt2kd mn l prev tx hash
           currentBlock = b;
           ArrayList<JSONObject> blockTransaction = b.getTransactions();

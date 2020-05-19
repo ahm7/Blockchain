@@ -36,6 +36,8 @@ public class LeaderBFTSender extends Thread{
 
         } catch (InvalidKeyException | IOException e) {
 
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 

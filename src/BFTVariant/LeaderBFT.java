@@ -27,7 +27,7 @@ public class LeaderBFT extends NodeBFT{
         thread.start();
     }
 
-    public void validateBlock(Block b) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public void validateBlock(Block b) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, InterruptedException {
         if(currentBlock == null){
             currentBlock = b;
             handleBlock(b);
@@ -38,7 +38,7 @@ public class LeaderBFT extends NodeBFT{
         }
     }
 
-    public void handleBlock(Block b) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public void handleBlock(Block b) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, InterruptedException {
         System.out.println("Handle Block " + currentBlock.getPreviousBlockHash());
         if(b != null){
             BFT bft = new  BFT();
@@ -82,7 +82,7 @@ public class LeaderBFT extends NodeBFT{
 
     }
 
-    public void addToVotes(Vote v) throws SignatureException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void addToVotes(Vote v) throws SignatureException, NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException {
         votesRecieved.add(v);
         System.out.println("Vote For Block " + currentBlock.getPreviousBlockHash() + " " + v.getNodeVote());
         if(votesRecieved.size() == networkSize){

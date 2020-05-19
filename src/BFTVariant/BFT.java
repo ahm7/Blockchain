@@ -15,7 +15,7 @@ public class BFT {
 
     }
 
-    public void prePrepare(Block b, int nodeNumber) throws IOException {
+    public void prePrepare(Block b, int nodeNumber) throws IOException, InterruptedException {
         // POWVariant.Miner sends block to leader
         PeerToPeer conn = new PeerToPeer();
         parsing p = new parsing();
@@ -25,7 +25,7 @@ public class BFT {
         conn.sendBlock(ip, port, b);
     }
 
-    public void prepare(Block b, int nodeNumber) throws IOException {
+    public void prepare(Block b, int nodeNumber) throws IOException, InterruptedException {
         // Leader sends block to all nodes in the network
         PeerToPeer conn = new PeerToPeer();
         parsing p = new parsing();
