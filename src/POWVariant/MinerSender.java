@@ -34,14 +34,14 @@ public class MinerSender extends Thread{
     {
         try{
             if(methodType == 1){
-                m.lock.lock();
+                m.lock2.lock();
                 m.validateBlock((Block) b);
                 int temp_branch_num = m.choosed_branch;
                 int temp2 = m.chooseBlockToMineOnTopOfIt();
                 if(temp_branch_num != temp2){
                     m.branchChanged = true;
                 }
-                m.lock.unlock();
+                m.lock2.unlock();
 
 
             }else if(methodType == 2){
@@ -178,7 +178,9 @@ public class MinerSender extends Thread{
                     temp.add(m.pending_transactions.get(key));
                 }
                 Block bb = m.buildBlock(temp);
-                System.out.println("AFTER BUILD BLOCK it's hash  : " + bb.getBlockHash());
+                if(bb != null) {
+                    System.out.println("AFTER BUILD BLOCK it's hash  : " + bb.getBlockHash());
+                }
                 System.out.println("IS NEW BLOCK ARRIVED: " + m.newBlockArrived);
                 if(m.newBlockArrived && bb == null){
                     System.out.println("ANA D5LT fl condition l 8lat");
@@ -187,6 +189,13 @@ public class MinerSender extends Thread{
                     recieveTransactionHandling(false);
 
                 }else {
+                    m.lock2.lock();
+                    m.maxLength = 0;
+                    for(int u=0; u<m.pendingBlocks.size();u++){
+                        if(m.pendingBlocks.get(u).size()>m.maxLength);
+                        m.maxLength  = m.pendingBlocks.size() ;
+                        m.maxIndex = u;
+                    }
                     if(m.pendingBlocks.size()>0){
                         m.pendingBlocks.get(m.maxIndex).add(bb);
                         PeerToPeer conn = new PeerToPeer();
@@ -196,8 +205,15 @@ public class MinerSender extends Thread{
                         for(int k=0; k<bb.getTransactions().size();k++){
                             m.branches_transactions.get(m.maxIndex).put(bb.getTransactions().get(k).get("hash").toString(),bb.getTransactions().get(k));
                         }
+                        m.maxLength = 0;
+                        for(int o=0;o<m.pendingBlocks.size();o++){
+                            if(m.pendingBlocks.get(o).size()>m.maxLength){
+                                m.maxLength  = m.pendingBlocks.get(o).size();
+                                m.maxIndex = o;
+                            }
+                        }
 
-                        if(m.maxLength > 2){
+                        if(m.maxLength > 5){
                             Block safeBlock = m.pendingBlocks.get(m.maxIndex).get(0);
                             String safeblockHashValue = "";
                             safeblockHashValue += safeBlock.getPreviousBlockHash();
@@ -217,16 +233,27 @@ public class MinerSender extends Thread{
                                 if(safeblockHashValue.equals(blockHashValue)){
                                     m.pendingBlocks.get(i).remove(0);
 
+
                                     for(int u=0;u<safeBlock.getTransactions().size();u++){
                                         m.branches_transactions.get(i).remove(safeBlock.getTransactions().get(u).get("hash"));
+                                       System.out.println("DELETE 3ADY W BEST NONCE IS :" + safeBlock.getNonce() );
                                     }
                                 }else{
                                     m.pendingBlocks.remove(i);
                                     m.branches_transactions.remove(i);
+                                    System.out.println("best Nonce : " + safeBlock.getNonce());
                                     i--;
                                 }
                             }
-                            m.maxLength = m.maxLength - 1;
+                            m.maxLength = 0;
+                            for(int  i=0;i<m.pendingBlocks.size();i++){
+                                if(m.pendingBlocks.get(i).size()>m.maxLength){
+                                    m.maxIndex = i;
+                                    m.maxLength = m.pendingBlocks.get(i).size();
+                                }
+                            }
+
+
                         }
 
 
@@ -235,7 +262,7 @@ public class MinerSender extends Thread{
                         ArrayList<Block> temp4 = new ArrayList<Block>();
                         temp4.add(bb);
                         m.pendingBlocks.add(temp4);
-                        m.maxLength++;
+                        m.maxLength = 1;
 
                         Map<String,JSONObject> temp1= new HashMap<String,JSONObject>();
                         for(int i=0; i<bb.getTransactions().size();i++){
@@ -254,6 +281,7 @@ public class MinerSender extends Thread{
 
                     }
                     m.chooseBlockToMineOnTopOfIt();
+                    m.lock2.unlock();
 
 
 
@@ -264,7 +292,10 @@ public class MinerSender extends Thread{
                         System.out.println("");
                     }
 
+
                     m.pending_transactions.clear();
+
+                    //recieveTransactionHandling(false);
                 }
                 //m.validateBlock(bb);
 

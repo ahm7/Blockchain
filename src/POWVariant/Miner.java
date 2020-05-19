@@ -17,12 +17,12 @@ import Helper.*;
 public class Miner extends Node {
 
     public  String prevBlockHash ;
-    public  int  difficulty  = 2;
+    public  int  difficulty  = 5;
     public Map<String,JSONObject> pending_transactions  = new HashMap<String,JSONObject>();
     public Map<String,JSONObject> all_valid_transactions  = new HashMap<String,JSONObject>();
     public Map<String,Integer> all_invalid_prevtransactions  = new HashMap<String,Integer>();
     ArrayList<Map<String,JSONObject>> branches_transactions = new ArrayList<Map<String,JSONObject>>();
-    public  int blockSize = 5;
+    public  int blockSize = 3;
     public int choosed_branch = 0;
     boolean branchChanged = false;
     boolean newBlockArrived = false;
@@ -129,9 +129,7 @@ public class Miner extends Node {
 
 
     public void validateBlock(Block b) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException, InterruptedException, InvalidKeySpecException {
-        System.out.println("Enter validate block");
-        System.out.println("Pneding block size : " + pendingBlocks.size());
-        System.out.println("prev block hash " + b.getPreviousBlockHash());
+        System.out.println("Enter validate block block : " +b.getNonce());
         ArrayList<JSONObject> blockTransaction = b.getTransactions();
         String blockHashValuee = "";
         blockHashValuee += b.getPreviousBlockHash();
@@ -152,8 +150,8 @@ public class Miner extends Node {
             }
 
         }
-        System.out.println("middle of  validate block");
-        System.out.println("is transactions valid  : " + valid);
+
+       System.out.println("is transactions for block : " + b.getNonce()+ "  valid  : " + valid);
         //System.out.println("Valid  ? : "+valid);
         if(valid){
 
@@ -178,7 +176,7 @@ public class Miner extends Node {
                 boolean found_place = false;
                 for (int i = 0; i < size; i++) {
                     int listSize = pendingBlocks.get(i).size();
-                    System.out.println("EL list rqm " + i + " El size bt3ha : " + listSize);
+                   // System.out.println("EL list rqm " + i + " El size bt3ha : " + listSize);
                     for (int j = 0; j < listSize; j++) {
                         Block temp = pendingBlocks.get(i).get(j);
                         String blockHashValue = "";
@@ -224,6 +222,7 @@ public class Miner extends Node {
                                     maxLength = collisionList.size();
                                     maxIndex = pendingBlocks.size();
                                 }
+                                //checked
                                 pendingBlocks.add(collisionList);
                                 chooseBlockToMineOnTopOfIt();
                                 newBlockArrived = true;
@@ -236,6 +235,9 @@ public class Miner extends Node {
                             System.out.println("L2et el prev block w 7azwdha fl list");
 
                             pendingBlocks.get(i).add(b);
+                            if(i == maxIndex){
+                                maxLength ++;
+                            }
                             chooseBlockToMineOnTopOfIt();
                             newBlockArrived = true;
 
@@ -276,9 +278,11 @@ public class Miner extends Node {
 
                             branches_transactions.add(temp2);
                             temp1.add(b);
+                            //checked
                             pendingBlocks.add(temp1);
                             PeerToPeer conn = new PeerToPeer();
                             conn.broadcastBlock(b,nodeNumber);
+
                         }
 
 
@@ -289,7 +293,15 @@ public class Miner extends Node {
 
 
             }
-            if(maxLength > 2){
+            maxLength = 0;
+            for(int o=0;o<pendingBlocks.size();o++){
+                if(pendingBlocks.get(o).size()>maxLength){
+                    maxLength  = pendingBlocks.get(o).size();
+                    maxIndex = o;
+                }
+            }
+
+            if(maxLength > 5){
                 Block safeBlock = pendingBlocks.get(maxIndex).get(0);
                 String safeblockHashValue = "";
                 safeblockHashValue += safeBlock.getPreviousBlockHash();
@@ -319,6 +331,9 @@ public class Miner extends Node {
                             branches_transactions.get(i).remove(safeBlock.getTransactions().get(u).get("hash"));
                         }
                     }else{
+                        System.out.println("best NONCE = : " + safeBlock.getNonce());
+                        System.out.println(" removed nonce : " + pendingBlocks.get(i).get(0));
+                        System.out.println(i);
                         pendingBlocks.remove(i);
                         branches_transactions.remove(i);
                         i--;
@@ -327,8 +342,8 @@ public class Miner extends Node {
                 maxLength = maxLength - 1;
             }
 
-            System.out.println("end of if valid");
-            System.out.println("Pneding block size : " + pendingBlocks.size());
+         //   System.out.println("end of if valid");
+           // System.out.println("Pneding block size : " + pendingBlocks.size());
         }
 
         System.out.println("end of validate block");
@@ -342,12 +357,11 @@ public class Miner extends Node {
         System.out.println("MAX LENGTH : " + maxLength);
         System.out.println("MAX INDEX : " + maxIndex);
 
+        System.out.println(" BLOCK CHAIN ");
+        for(int z=0;z<blockChain.size();z++){
+            System.out.print(blockChain.get(z).getNonce() + ">  " );
+        }
+        System.out.println(" ");
     }
-
-
-
-
-
-
 
 }
