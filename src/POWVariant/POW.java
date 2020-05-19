@@ -36,6 +36,7 @@ public class POW {
     }
 
     public Block getProofOfWork(){
+        long start_millis = System.currentTimeMillis() ;
         while(true){
             String concat = "";
             concat += block.getPreviousBlockHash();
@@ -53,6 +54,9 @@ public class POW {
             int nonce = block.getNonce();
             block.setNonce(nonce + 1);
         }
+        long end_millis = System.currentTimeMillis() ;
+
+        System.out.println("mining time : " + (end_millis - start_millis));
 
        return block;
     }

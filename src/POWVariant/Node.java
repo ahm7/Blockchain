@@ -35,7 +35,7 @@ public class Node {
     public Map<String,JSONObject> temp_UTXO_list = new HashMap<String,JSONObject>();
     ArrayList<PublicKey> publicKeys;
     public ArrayList<Block> blockChain = new ArrayList<Block>();
-    private int difficulty = 4 ;
+    private int difficulty = 5 ;
     int nodeNumber = -1;
     private Map<String,JSONObject> waited_transactions = new HashMap<String,JSONObject>() ;
     int maxLength = 0;
@@ -45,6 +45,7 @@ public class Node {
     Lock lock = new ReentrantLock();
     Lock lock2= new ReentrantLock();
     int portNum = -1;
+    public int uncertainity_block_num = 5;
 
     public Node(int portNum,int nodeNumber){
         generateKeyPair();
@@ -224,7 +225,7 @@ public class Node {
 
                 }
             }
-            if(maxLength > 5){
+            if(maxLength > uncertainity_block_num){
                 System.out.println(" FOUND SAFE BLOCK TO ADD ");
                 Block safeBlock = pendingBlocks.get(maxIndex).get(0);
                 String safeblockHashValue = "";
@@ -365,7 +366,7 @@ public class Node {
         boolean singnatur_is_right = false ;
         if(IS_UTXO){
             singnatur_is_right = validateSignature(transaction);
-            //System.out.println("singnatur_is_right : " + singnatur_is_right );
+            System.out.println("singnatur_is_right : " + singnatur_is_right );
 
         }
        // System.out.println("is signature right:" + singnatur_is_right);

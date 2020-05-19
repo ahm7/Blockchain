@@ -1,8 +1,8 @@
 1	localhost	4000
-2	localhost	4001
+2	197.40.170.43	4001
 3	localhost	4002
-4	localhost	4003
-5	localhost	4004
+4	197.40.170.43	4003
+5	197.40.170.43	4004
 6	localhost	4005
 7	localhost	4006
 8	localhost	4007

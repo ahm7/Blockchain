@@ -1,12 +1,12 @@
 package POWVariant;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
+import java.io.*;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +22,7 @@ public class Miner extends Node {
     public Map<String,JSONObject> all_valid_transactions  = new HashMap<String,JSONObject>();
     public Map<String,Integer> all_invalid_prevtransactions  = new HashMap<String,Integer>();
     ArrayList<Map<String,JSONObject>> branches_transactions = new ArrayList<Map<String,JSONObject>>();
-    public  int blockSize = 3;
+    public  int blockSize = 5;
     public int choosed_branch = 0;
     boolean branchChanged = false;
     boolean newBlockArrived = false;
@@ -53,11 +53,35 @@ public class Miner extends Node {
     }
 
 
-    public Block buildBlock(ArrayList<JSONObject> transactions ){
+    public Block buildBlock(ArrayList<JSONObject> transactions ) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         Block b = new Block();
         Timestamp time = new Timestamp(System.currentTimeMillis());
         b.setPreviousBlockHash(this.prevBlockHash);
         b.setTimestamp(time);
+        // malisious MINER
+        transactions.add(transactions.get(0));
+        for(int i=0;i<transactions.size();i++){
+
+            JSONArray jsonArray  = (JSONArray) transactions.get(i).get("outputs");
+
+            JSONObject output =(JSONObject) jsonArray.get(1);
+
+            output.remove("publicKey");
+
+
+            InputStream inputStream = new FileInputStream("testFiles/keys"+nodeNumber+"c"+".txt");
+            long fileSize = new File("testFiles/keys"+nodeNumber+"c"+".txt").length();
+            byte[] allBytes = new byte[(int) fileSize];
+            inputStream.read(allBytes);
+            KeyFactory kf = KeyFactory.getInstance("RSA"); // or "EC" or whatever
+            PublicKey publicKey = kf.generatePublic(new X509EncodedKeySpec(allBytes));
+
+            output.put("publicKey",publicKey);
+            transactions.get(i).remove("outputs");
+            transactions.get(i).put("outputs",jsonArray);
+        }
+
+
         b.setTransactions(transactions);
         b.generateBlockHash();
         POW pow = new POW(b,difficulty,this);
@@ -144,6 +168,7 @@ public class Miner extends Node {
         if(valid){
             for(int i = 0 ; i < blockTransaction.size() ; i++){
                 valid = validateTransaction(blockTransaction.get(i));
+
                 if(!valid){
                     break;
                 }
@@ -301,7 +326,7 @@ public class Miner extends Node {
                 }
             }
 
-            if(maxLength > 5){
+            if(maxLength > uncertainity_block_num){
                 Block safeBlock = pendingBlocks.get(maxIndex).get(0);
                 String safeblockHashValue = "";
                 safeblockHashValue += safeBlock.getPreviousBlockHash();

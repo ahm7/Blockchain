@@ -213,7 +213,7 @@ public class MinerSender extends Thread{
                             }
                         }
 
-                        if(m.maxLength > 5){
+                        if(m.maxLength > m.uncertainity_block_num){
                             Block safeBlock = m.pendingBlocks.get(m.maxIndex).get(0);
                             String safeblockHashValue = "";
                             safeblockHashValue += safeBlock.getPreviousBlockHash();
